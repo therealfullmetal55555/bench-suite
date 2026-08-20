@@ -1,0 +1,18 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+dist/
+build/
+
+# the harness's own scratch: run files, caches, transcripts. A result that is meant
+# to be published goes to results/, which is committed.
+.bench/
+runs/
+*.tsv
+
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/

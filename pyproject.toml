@@ -1,0 +1,96 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bench-suite"
+version = "0.1.0"
+description = "A public benchmark for retrieval and tool-using agents, with error bars, a cost column, and the failures listed"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+dependencies = [
+  "pyyaml>=6.0",
+  "httpx>=0.27",
+  "pydantic>=2.9",
+  "jsonschema>=4.23",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "pytest-cov>=6.0",
+  "ruff>=0.7",
+  "black>=24.10",
+  "mypy>=1.13",
+  "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+bench = "bench.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/therealfullmetal55555/bench-suite"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+# The list grows with the project: a package appears here when it has code in it,
+# never before. `pip install -e .` fails loudly if the two disagree, which is a
+# better failure mode than an empty directory that imports.
+packages = [
+  "bench",
+  "bench.core",
+  "bench.generators",
+  "bench.judge",
+  "bench.scorers",
+  "bench.targets",
+]
+
+# The generator's ground truth travels with the wheel, so that a tarball, a checkout and an
+# installed copy generate the same task set. The checks that guard it live in
+# `tests/test_generators.py` and read the same files.
+[tool.setuptools.package-data]
+"bench.generators" = ["data/*.yaml", "data/corpus/*/*.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+markers = [
+  "network: needs a live model or endpoint (deselected by default)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["bench"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "C4", "RET", "ARG", "PTH"]
+ignore = [
+  # the runner keeps a stub target's unused argument, which is the point of a stub
+  "ARG001",
+  # the CLI's job is stdout
+  "T20",
+]
+extend-per-file-ignores = {}
+
+[tool.ruff.lint.per-file-ignores]
+"src/bench/cli.py" = ["T20"]
+"tests/*" = ["ARG001", "ARG002", "ARG005"]  # a canned transport ignores its request
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.mypy]
+python_version = "3.12"
+packages = ["bench"]
+mypy_path = "src"
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+no_implicit_optional = true
