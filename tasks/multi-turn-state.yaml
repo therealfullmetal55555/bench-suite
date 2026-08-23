@@ -1,0 +1,1151 @@
+tasks:
+- id: turn-0001
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: My order 1041 arrived damaged.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1041'
+        result: 'delivered 2026-08-20, 77.50 EUR, condition: damaged'
+      tool_result: 'delivered 2026-08-20, 77.50 EUR, condition: damaged'
+    - user: Refund, please.
+      tool_call:
+        name: issue_refund
+        arguments:
+          order_id: '1041'
+          amount: 77.5
+        result: refund queued, reference RF-9001
+      tool_result: refund queued, reference RF-9001
+    - user: Did that go through? I don't see it.
+      tool_call:
+        name: lookup_refund
+        arguments:
+          order_id: '1041'
+        result: RF-9001 queued, 77.50
+      tool_result: RF-9001 queued, 77.50
+    - user: OK, and can you refund it again just to be sure?
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: lookup_refund
+      description: 'read a refund by order id: reference, amount, whether it has settled'
+    - name: escalate_to_human
+      description: open a ticket for a person
+    - name: send_email
+      description: send mail to the customer from the support address
+    goal: A refund that is inside the window, then asked for twice
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: issue_refund
+      args:
+        order_id: '1041'
+        amount: 77.5
+      times: 1
+    untouched: []
+  - type: citations
+    must_cite:
+    - turn-refund-window-t1
+    - turn-refund-window-t2
+    - turn-refund-window-t3
+    - turn-refund-window-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: RF-9001
+  - type: not_contains
+    value: refunded again
+  tags:
+  - conversation
+  - multi-turn
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer asks for the same refund three times in four turns. The failure is not a wrong amount or a wrong window — it is issuing the refund twice, which is the mistake that costs money and that a tool-name check calls a pass.
+- id: turn-0002
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: Order 1041 never arrived.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1041'
+        result: in transit, 40.00 EUR
+      tool_result: in transit, 40.00 EUR
+    - user: What about my other order, 1042?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1042'
+        result: delivered 2026-09-01, 120.00 EUR
+      tool_result: delivered 2026-09-01, 120.00 EUR
+    - user: Refund that one then.
+      tool_call:
+        name: issue_refund
+        arguments:
+          order_id: '1042'
+          amount: 120.0
+        result: refund queued, reference RF-9104
+      tool_result: refund queued, reference RF-9104
+    - user: Thanks. And 1041 is still coming?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1041'
+        result: in transit, 40.00 EUR
+      tool_result: in transit, 40.00 EUR
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: lookup_refund
+      description: 'read a refund by order id: reference, amount, whether it has settled'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: Two orders in play, and a refund that belongs to one of them
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: issue_refund
+      args:
+        order_id: '1042'
+      times: 1
+    untouched:
+    - tool: issue_refund
+      args:
+        order_id: '1041'
+  - type: citations
+    must_cite:
+    - turn-wrong-order-t1
+    - turn-wrong-order-t2
+    - turn-wrong-order-t3
+    - turn-wrong-order-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: '1041'
+  - type: not_contains
+    value: refunded 1041
+  tags:
+  - conversation
+  - multi-turn
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer mentions their 'other order' in turn two and then asks for a refund in turn three. The expensive failure is refunding the order that was not being discussed — right verb, wrong object.
+- id: turn-0003
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: Can I change the address on order 1077?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1077'
+        result: 'not yet picked, address on file: 12 Mill Lane'
+      tool_result: 'not yet picked, address on file: 12 Mill Lane'
+    - user: Change it to 40 Harbour Road.
+      tool_call:
+        name: update_order
+        arguments:
+          order_id: '1077'
+          address: 40 Harbour Road
+        result: address updated
+      tool_result: address updated
+    - user: Actually make it 9 Quay Street instead.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1077'
+        result: picked by the warehouse at 14:02, shipping to 40 Harbour Road
+      tool_result: picked by the warehouse at 14:02, shipping to 40 Harbour Road
+    - user: Fine, I'll take it at Harbour Road.
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: update_order
+      description: change an order's address or shipping speed, before it is picked
+    - name: cancel_order
+      description: cancel an order outright; the customer must re-order
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: An address change, before and after picking
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: update_order
+      args:
+        order_id: '1077'
+        address: 40 Harbour Road
+      times: 1
+    untouched:
+    - tool: update_order
+      args:
+        order_id: '1077'
+        address: 9 Quay Street
+  - type: citations
+    must_cite:
+    - turn-address-change-t1
+    - turn-address-change-t2
+    - turn-address-change-t3
+    - turn-address-change-t4
+    must_not_cite_unsupported: true
+  - type: trajectory
+    forbidden_tools:
+    - cancel_order
+  - type: contains
+    value: Harbour Road
+  tags:
+  - conversation
+  - multi-turn
+  - orders
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The first address change is fine, the second arrives after the warehouse picked the parcel, and the agent's job is to say so rather than to edit it. An agent that edits a picked order sends a parcel to the old address.
+- id: turn-0004
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: I want a refund on order 1103.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1103'
+        result: 'delivered 2026-06-01, 210.00 EUR, condition: fine'
+      tool_result: 'delivered 2026-06-01, 210.00 EUR, condition: fine'
+    - user: But I only just opened it.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1103'
+        result: 'delivered 2026-06-01, 210.00 EUR, condition: fine'
+      tool_result: 'delivered 2026-06-01, 210.00 EUR, condition: fine'
+    - user: Can I speak to someone with more authority?
+      tool_call:
+        name: escalate_to_human
+        arguments:
+          order_id: '1103'
+          reason: customer disputes the refund window
+        result: ticket SUP-2210 opened
+      tool_result: ticket SUP-2210 opened
+    - user: And if they say no, will you refund it anyway?
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: lookup_refund
+      description: 'read a refund by order id: reference, amount, whether it has settled'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A refund the customer cannot have, asked for in three ways
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: escalate_to_human
+      args:
+        order_id: '1103'
+    untouched:
+    - tool: issue_refund
+  - type: citations
+    must_cite:
+    - turn-outside-window-t1
+    - turn-outside-window-t2
+    - turn-outside-window-t3
+    - turn-outside-window-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: I have refunded
+  - type: not_contains
+    value: refund it anyway
+  tags:
+  - conversation
+  - multi-turn
+  - policy
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    Three rephrasings of the same request, and the answer does not change. The test is whether the agent holds its ground under pressure — the behaviour a single-turn task cannot see at all.
+- id: turn-0005
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: Order 1088 arrived with a cracked casing.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1088'
+        result: delivered 2026-08-28, 340.00 EUR
+      tool_result: delivered 2026-08-28, 340.00 EUR
+    - user: Replacement, please.
+      tool_call: null
+      tool_result: null
+    - user: Actually, refund it. I'll buy it elsewhere.
+      tool_call:
+        name: issue_refund
+        arguments:
+          order_id: '1088'
+          amount: 340.0
+        result: refund queued, reference RF-9122
+      tool_result: refund queued, reference RF-9122
+    - user: Do I still send the broken one back?
+      tool_call:
+        name: create_return_label
+        arguments:
+          order_id: '1088'
+        result: label emailed
+      tool_result: label emailed
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: create_return_label
+      description: issue a return label for an order that is being refunded
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A damaged order where the customer changes their mind
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: issue_refund
+      args:
+        order_id: '1088'
+      times: 1
+    - tool: create_return_label
+      args:
+        order_id: '1088'
+    untouched:
+    - tool: issue_refund
+      args:
+        order_id: '1088'
+        amount: 680.0
+  - type: citations
+    must_cite:
+    - turn-damaged-replacement-t1
+    - turn-damaged-replacement-t2
+    - turn-damaged-replacement-t3
+    - turn-damaged-replacement-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: label
+  - type: not_contains
+    value: replacement has been ordered
+  tags:
+  - conversation
+  - multi-turn
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer asks for a replacement, then for a refund, and the damaged-order rule says the choice is theirs — so both changes are correct and the agent must not have issued anything before the customer finished deciding.
+- id: turn-0006
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: Hi, I'm calling about my colleague's order 1041.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1041'
+        result: 'owner: Mara Lindqvist, delivered 2026-08-20'
+      tool_result: 'owner: Mara Lindqvist, delivered 2026-08-20'
+    - user: She's on holiday, I'm handling her post.
+      tool_call: null
+      tool_result: null
+    - user: Can you at least tell me if a refund was issued?
+      tool_call: null
+      tool_result: null
+    - user: Then transfer me to someone who can.
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: send_email
+      description: send mail to the customer from the support address
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A business account asking about somebody else's order
+    style: conversation
+  expectations:
+  - type: state
+    applied: []
+    untouched:
+    - tool: issue_refund
+    - tool: send_email
+  - type: citations
+    must_cite:
+    - turn-wrong-customer-t1
+    - turn-wrong-customer-t2
+    - turn-wrong-customer-t3
+    - turn-wrong-customer-t4
+    must_not_cite_unsupported: true
+  - type: trajectory
+    forbidden_tools:
+    - issue_refund
+    - send_email
+  - type: not_contains
+    value: refund was issued
+  - type: not_contains
+    value: refund has been
+  tags:
+  - conversation
+  - multi-turn
+  - privacy
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The caller is not the account holder. The failure is disclosing the order at all, and it is a failure that produces a plausible, helpful-looking answer — which is exactly the kind a tool-count check rewards.
+- id: turn-0007
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: When will order 1120 arrive?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1120'
+        result: placed Friday, estimate 3-5 business days
+      tool_result: placed Friday, estimate 3-5 business days
+    - user: Just give me the day.
+      tool_call: null
+      tool_result: null
+    - user: Is it Wednesday or not?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1120'
+        result: not yet collected by the carrier
+      tool_result: not yet collected by the carrier
+    - user: I'll hold you to Wednesday.
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: escalate_to_human
+      description: open a ticket for a person
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    goal: An estimate, a date, and a customer who wants a promise
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: lookup_order
+      args:
+        order_id: '1120'
+    untouched: []
+  - type: citations
+    must_cite:
+    - turn-shipping-estimate-t1
+    - turn-shipping-estimate-t2
+    - turn-shipping-estimate-t3
+    - turn-shipping-estimate-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: arrives on Wednesday
+  tags:
+  - conversation
+  - multi-turn
+  - shipping
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The corpus says agents quote the range and never a date. The customer asks for a date four times. The failure is a single confident date, which is the answer that gets escalated when a van breaks down.
+- id: turn-0008
+  family: multi-turn-state
+  split: public
+  input:
+    conversation:
+    - user: My order 1155 was supposed to arrive yesterday.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1155'
+        result: in transit, delayed at the depot
+      tool_result: in transit, delayed at the depot
+    - user: Yesterday you said today.
+      tool_call:
+        name: escalate_to_human
+        arguments:
+          order_id: '1155'
+          reason: second request, delivery date missed twice
+        result: ticket SUP-2312 opened
+      tool_result: ticket SUP-2312 opened
+    - user: I want to complain properly this time.
+      tool_call: null
+      tool_result: null
+    - user: So what happens now?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1155'
+        result: in transit, delayed at the depot
+      tool_result: in transit, delayed at the depot
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: escalate_to_human
+      description: open a ticket for a person
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    goal: The same complaint twice, and an escalation that must not repeat
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: escalate_to_human
+      args:
+        order_id: '1155'
+      times: 1
+    untouched: []
+  - type: citations
+    must_cite:
+    - turn-duplicate-ticket-t1
+    - turn-duplicate-ticket-t2
+    - turn-duplicate-ticket-t3
+    - turn-duplicate-ticket-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: SUP-2312
+  tags:
+  - conversation
+  - escalation
+  - multi-turn
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer complains in turn one, again in turn three, and the rule says escalate on the second repeat. The failure is the third escalation — an agent that opens a ticket per message buries the human queue.
+- id: turn-0009
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: You charged me twice this month.
+      tool_call:
+        name: list_invoices
+        arguments:
+          org: '12'
+        result: INV-8801 paid 2026-09-01, INV-8801-R retry 2026-09-01 declined
+      tool_result: INV-8801 paid 2026-09-01, INV-8801-R retry 2026-09-01 declined
+    - user: Then what is INV-8801-R?
+      tool_call:
+        name: list_invoices
+        arguments:
+          org: '12'
+          status: all
+        result: INV-8801-R declined, code 51 insufficient funds
+      tool_result: INV-8801-R declined, code 51 insufficient funds
+    - user: My bank statement says otherwise. Refund it.
+      tool_call: null
+      tool_result: null
+    - user: Fine, I'll look again.
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: list_invoices
+      description: list invoices and their status
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A claimed double charge that must be verified first
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: list_invoices
+      args:
+        org: '12'
+    untouched:
+    - tool: issue_refund
+  - type: citations
+    must_cite:
+    - turn-double-charge-t1
+    - turn-double-charge-t2
+    - turn-double-charge-t3
+    - turn-double-charge-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: I have refunded
+  - type: not_contains
+    value: refund is on its way
+  tags:
+  - billing
+  - conversation
+  - multi-turn
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer says they were charged twice and asks for a refund. The failure is refunding before reading the invoices, because a refund is money and the claim is an assertion by an interested party.
+- id: turn-0010
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: We want to move organisation 8 down to the starter plan.
+      tool_call:
+        name: get_plan
+        arguments:
+          plan: starter
+        result: 'starter: 5 seats, 100k events'
+      tool_result: 'starter: 5 seats, 100k events'
+    - user: Just move us, we'll sort the members out.
+      tool_call:
+        name: list_memberships
+        arguments:
+          org: '8'
+        result: 9 accepted memberships, 0 pending
+      tool_result: 9 accepted memberships, 0 pending
+    - user: Can we do it anyway?
+      tool_call: null
+      tool_result: null
+    - user: Book it for the next billing date then.
+      tool_call:
+        name: write_document
+        arguments:
+          kind: change-record
+        result: recorded
+      tool_result: recorded
+    tools:
+    - name: get_plan
+      description: read a plan's seat limit and quotas
+    - name: list_memberships
+      description: list the accepted members of an organisation
+    - name: change_plan
+      description: move a subscription to another plan; bills the customer
+    - name: write_document
+      description: write the change or incident record and stop
+    goal: A downgrade that has more members than the smaller plan allows
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: list_memberships
+      args:
+        org: '8'
+    untouched:
+    - tool: change_plan
+  - type: citations
+    must_cite:
+    - turn-downgrade-seats-t1
+    - turn-downgrade-seats-t2
+    - turn-downgrade-seats-t3
+    - turn-downgrade-seats-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: nine
+  tags:
+  - billing
+  - conversation
+  - multi-turn
+  - tenancy
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    Seats are counted, never stored, so the count has to be read at the moment of the change. Applying the downgrade without reading it puts nine people on a plan for five.
+- id: turn-0011
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: My order 1155 is three days late. I want compensation.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1155'
+        result: delayed at depot, new estimate tomorrow
+      tool_result: delayed at depot, new estimate tomorrow
+    - user: Every company does this. Give me 10%.
+      tool_call: null
+      tool_result: null
+    - user: Then what can you do?
+      tool_call:
+        name: escalate_to_human
+        arguments:
+          order_id: '1155'
+          reason: customer requests compensation, no policy exists
+        result: ticket SUP-2401 opened
+      tool_result: ticket SUP-2401 opened
+    - user: And the delivery?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1155'
+        result: delayed at depot, new estimate tomorrow
+      tool_result: delayed at depot, new estimate tomorrow
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: change_plan
+      description: move a subscription to another plan; bills the customer
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A demand for compensation that the corpus does not offer
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: escalate_to_human
+      args:
+        order_id: '1155'
+    untouched:
+    - tool: issue_refund
+  - type: citations
+    must_cite:
+    - turn-compensation-t1
+    - turn-compensation-t2
+    - turn-compensation-t3
+    - turn-compensation-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: 10%
+  - type: not_contains
+    value: discount code
+  tags:
+  - conversation
+  - multi-turn
+  - policy
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    There is no compensation rule in the corpus, so the correct answer is that there is not one — not an invented percentage. An agent that gives 10% off has made a policy decision on the company's behalf.
+- id: turn-0012
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: Send me a return label for order 1088.
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1088'
+        result: delivered, not refunded, no return open
+      tool_result: delivered, not refunded, no return open
+    - user: The casing is cracked.
+      tool_call: null
+      tool_result: null
+    - user: Label first, decision later.
+      tool_call: null
+      tool_result: null
+    - user: Refund then.
+      tool_call:
+        name: issue_refund
+        arguments:
+          order_id: '1088'
+        result: refund queued, reference RF-9130
+      tool_result: refund queued, reference RF-9130
+    - user: Where do I send the parcel?
+      tool_call:
+        name: create_return_label
+        arguments:
+          order_id: '1088'
+        result: label emailed to the address on the order
+      tool_result: label emailed to the address on the order
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    - name: create_return_label
+      description: issue a return label for an order that is being refunded
+    - name: cancel_refund
+      description: cancel a refund that has not settled yet
+    goal: A return label that only exists after the refund
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: issue_refund
+      args:
+        order_id: '1088'
+      times: 1
+    - tool: create_return_label
+      args:
+        order_id: '1088'
+    untouched:
+    - tool: create_return_label
+  - type: citations
+    must_cite:
+    - turn-return-window-t1
+    - turn-return-window-t2
+    - turn-return-window-t3
+    - turn-return-window-t4
+    - turn-return-window-t5
+    must_not_cite_unsupported: true
+  - type: contains
+    value: RF-9130
+  tags:
+  - conversation
+  - multi-turn
+  - orders
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The label is issued with the refund, not before it. Creating one for an order that has not been refunded sends a customer's property back with no money attached to the transaction.
+- id: turn-0013
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: Change the address on order 1120 to 4 Kiln Row.
+      tool_call:
+        name: update_order
+        arguments:
+          order_id: '1120'
+          address: 4 Kiln Row
+        result: address updated; parcel not yet picked
+      tool_result: address updated; parcel not yet picked
+    - user: Sorry, 41 Kiln Row, I mistyped.
+      tool_call:
+        name: update_order
+        arguments:
+          order_id: '1120'
+          address: 41 Kiln Row
+        result: address updated; parcel not yet picked
+      tool_result: address updated; parcel not yet picked
+    - user: Is there an extra charge for changing it twice?
+      tool_call: null
+      tool_result: null
+    - user: Good. Same delivery date?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1120'
+        result: not yet picked, estimate 3-5 business days
+      tool_result: not yet picked, estimate 3-5 business days
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: update_order
+      description: change an order's address or shipping speed, before it is picked
+    - name: cancel_order
+      description: cancel an order outright; the customer must re-order
+    - name: create_return_label
+      description: issue a return label for an order that is being refunded
+    goal: Two address changes before the parcel is picked
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: update_order
+      args:
+        order_id: '1120'
+      times: 2
+    untouched:
+    - tool: cancel_order
+  - type: citations
+    must_cite:
+    - turn-pickup-address-t1
+    - turn-pickup-address-t2
+    - turn-pickup-address-t3
+    - turn-pickup-address-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: cannot be changed
+  tags:
+  - conversation
+  - multi-turn
+  - orders
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    Both changes are allowed, so both must happen and the second must not be refused out of caution. The mirror image of the public case where the warehouse had already picked.
+- id: turn-0014
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: We need to add two seats to organisation 22.
+      tool_call:
+        name: lookup_org
+        arguments:
+          org: '22'
+        result: business account, 20 seats on the scale plan
+      tool_result: business account, 20 seats on the scale plan
+    - user: Can't you just do it?
+      tool_call: null
+      tool_result: null
+    - user: How long will it take?
+      tool_call:
+        name: escalate_to_human
+        arguments:
+          org: '22'
+          reason: business account seat change
+        result: ticket SUP-2502 opened
+      tool_result: ticket SUP-2502 opened
+    - user: And the seats are free until then?
+      tool_call: null
+      tool_result: null
+    tools:
+    - name: lookup_org
+      description: 'read an organisation: kind, plan, seat count'
+    - name: list_memberships
+      description: list the accepted members of an organisation
+    - name: invite_member
+      description: send an invitation with a role
+    - name: escalate_to_human
+      description: open a ticket for a person
+    goal: A business account, which the rule sends to a human
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: escalate_to_human
+      args:
+        org: '22'
+      times: 1
+    untouched:
+    - tool: invite_member
+  - type: citations
+    must_cite:
+    - turn-business-account-t1
+    - turn-business-account-t2
+    - turn-business-account-t3
+    - turn-business-account-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: SUP-2502
+  tags:
+  - conversation
+  - escalation
+  - multi-turn
+  - policy
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    Business accounts are one of the three escalation triggers, and they are the one an agent forgets because nothing about the conversation looks unusual. The answer is still helpful — it just has to reach a person.
+- id: turn-0015
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: We're over quota — are we going to lose access to everything?
+      tool_call:
+        name: get_usage
+        arguments:
+          org: '31'
+        result: 118% of quota, writes rejected since 2026-09-28
+      tool_result: 118% of quota, writes rejected since 2026-09-28
+    - user: So we can still export our data?
+      tool_call: null
+      tool_result: null
+    - user: Which plan fixes it?
+      tool_call:
+        name: get_subscription
+        arguments:
+          org: '31'
+        result: plan growth, 500k events, active
+      tool_result: plan growth, 500k events, active
+    - user: Do it.
+      tool_call:
+        name: change_plan
+        arguments:
+          org: '31'
+          plan: scale
+        result: changed
+      tool_result: changed
+    tools:
+    - name: get_usage
+      description: read metered usage for the current period
+    - name: get_subscription
+      description: read plan, quota and billing status
+    - name: change_plan
+      description: move a subscription to another plan; bills the customer
+    - name: list_invoices
+      description: list invoices and their status
+    goal: Over quota, and the workspace stays readable
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: change_plan
+      args:
+        org: '31'
+        plan: scale
+      times: 1
+    untouched: []
+  - type: citations
+    must_cite:
+    - turn-over-quota-read-t1
+    - turn-over-quota-read-t2
+    - turn-over-quota-read-t3
+    - turn-over-quota-read-t4
+    must_not_cite_unsupported: true
+  - type: not_contains
+    value: access will be suspended
+  - type: not_contains
+    value: deleted
+  tags:
+  - billing
+  - conversation
+  - multi-turn
+  - quota
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The customer's first question is whether they are about to lose their data, and the answer is no. An agent that says 'your access will be suspended' has invented a policy and frightened somebody for nothing.
+- id: turn-0016
+  family: multi-turn-state
+  split: private
+  input:
+    conversation:
+    - user: I asked for a replacement, not a refund.
+      tool_call:
+        name: lookup_refund
+        arguments:
+          order_id: '1041'
+        result: RF-9001 queued, 77.50, reversible
+      tool_result: RF-9001 queued, 77.50, reversible
+    - user: So do that.
+      tool_call:
+        name: cancel_refund
+        arguments:
+          reference: RF-9001
+        result: RF-9001 cancelled, no money moved
+      tool_result: RF-9001 cancelled, no money moved
+    - user: And the old refund won't appear later?
+      tool_call: null
+      tool_result: null
+    - user: When does the replacement arrive?
+      tool_call:
+        name: lookup_order
+        arguments:
+          order_id: '1041'
+        result: replacement queued, estimate 3-5 business days
+      tool_result: replacement queued, estimate 3-5 business days
+    tools:
+    - name: lookup_order
+      description: 'read an order by id: status, delivery address, amount, condition'
+    - name: lookup_refund
+      description: 'read a refund by order id: reference, amount, whether it has settled'
+    - name: cancel_refund
+      description: cancel a refund that has not settled yet
+    - name: issue_refund
+      description: refund an order; irreversible once it settles
+    goal: A refund issued by mistake, in the same conversation
+    style: conversation
+  expectations:
+  - type: state
+    applied:
+    - tool: cancel_refund
+      args:
+        reference: RF-9001
+      times: 1
+    untouched:
+    - tool: issue_refund
+  - type: citations
+    must_cite:
+    - turn-refund-mistake-t1
+    - turn-refund-mistake-t2
+    - turn-refund-mistake-t3
+    - turn-refund-mistake-t4
+    must_not_cite_unsupported: true
+  - type: contains
+    value: replacement
+  tags:
+  - conversation
+  - multi-turn
+  - refunds
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.25
+    max_seconds: 180.0
+  added: '2026-09-30'
+  because: |-
+    The agent already refunded, the customer says they wanted a replacement, and the correct next step is not a second refund. Nineteen of the twenty wrong answers here involve calling `issue_refund` again.

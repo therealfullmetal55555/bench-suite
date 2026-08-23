@@ -1,0 +1,37 @@
+# Tool use, where the trajectory is the answer: which tool, in what order, how many
+# steps. Deterministic throughout, so nothing here rests on a judge.
+tasks:
+  - id: traj-0001
+    family: tool-trajectory
+    split: public
+    corpus: corpus
+    input:
+      question: "My order arrived damaged, what are my options?"
+    expectations:
+      - type: trajectory
+        required_tools: [search_docs]
+        forbidden_tools: [issue_refund]
+        max_steps: 3
+      - type: contains
+        value: "within 30 days"
+    because: |
+      Support is judged on what it does before it answers: looking the policy up is the
+      difference between quoting it and guessing at it.
+
+  - id: traj-0002
+    family: tool-trajectory
+    split: private
+    tags: [tools, refunds]
+    corpus: corpus
+    input:
+      question: "It has been 45 days, can I still get a refund?"
+    expectations:
+      - type: trajectory
+        required_tools: [search_docs]
+        forbidden_tools: [issue_refund]
+      - type: not_contains
+        value: "processed your refund"
+    because: |
+      The expensive failure: promising a refund outside the window, which support then
+      honours. Held back from the public split because it is the one people would
+      special-case.

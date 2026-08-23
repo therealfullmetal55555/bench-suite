@@ -1,0 +1,1129 @@
+tasks:
+- id: ext-0001
+  family: structured-extraction
+  split: public
+  input:
+    document: "Invoice 4471\nFrom: Northwind Tools\nIssued: 4 March 2026\nDue: 3 April 2026\n\n  2 × clamp,\
+      \ 24.00\n  1 × socket set, 16.58\n\nSubtotal: €64.58\nVAT: €12.92\nTotal: €77.50\n"
+    schema: &id001
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '4471'
+      vendor: Northwind Tools
+      issued: '2026-03-04'
+      due: '2026-04-03'
+      net: 64.58
+      tax: 12.92
+      total: 77.5
+      currency: EUR
+    weights:
+      total: 2
+  - type: schema
+    schema: *id001
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0002
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice 88213\nFrom: Helio Freight\nIssued: 2026-03-11\n\n  4 × pallet, 60.00\n\nSubtotal:\
+      \ $240.00\nVAT: $48.00\nTotal: $288.00\n\nNet 30.\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '88213'
+      vendor: Helio Freight
+      issued: '2026-03-11'
+      net: 240.0
+      tax: 48.0
+      total: 288.0
+      currency: USD
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0003
+  family: structured-extraction
+  split: public
+  input:
+    document: "Invoice A-2291\nFrom: Norrsken Tryck\nIssued: 19.02.2026\nDue: 19.03.2026\n\n  print run,\
+      \ 1400.00\n  paper surcharge, 350.00\n\nSubtotal: 1,750.00\nVAT: 437.50\nTotal: 2,187.50\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: A-2291
+      vendor: Norrsken Tryck
+      issued: '2026-02-19'
+      due: '2026-03-19'
+      net: 1750.0
+      tax: 437.5
+      total: 2187.5
+      currency: SEK
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0004
+  family: structured-extraction
+  split: private
+  input:
+    document: 'Invoice 77102-B
+
+      From: Copperfield Ltd
+
+      Issued: 30 January 2026
+
+      PO: PO-4417
+
+
+      Subtotal: £99.99
+
+      VAT: £0.00
+
+      Total: £99.99
+
+
+      Zero-rated: reverse charge applies.
+
+      '
+    schema: &id002
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: 77102-B
+      vendor: Copperfield Ltd
+      issued: '2026-01-30'
+      net: 99.99
+      tax: 0.0
+      total: 99.99
+      currency: GBP
+      po_number: PO-4417
+    weights:
+      total: 2
+  - type: schema
+    schema: *id002
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0005
+  family: structured-extraction
+  split: public
+  input:
+    document: "Dear accounts team,\n\nInvoice INV-2026-0033\nFrom: Bridge Analytics\nIssued: 2026-04-02\n\
+      Due: 2026-05-02\n\n  dashboard licence, 900.00\n  onboarding, 300.00\n\nSubtotal: 1,200.00\nVAT:\
+      \ 300.00\nTotal: 1,500.00\n\nPayment due within 30 days.\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: INV-2026-0033
+      vendor: Bridge Analytics
+      issued: '2026-04-02'
+      due: '2026-05-02'
+      net: 1200.0
+      tax: 300.0
+      total: 1500.0
+      currency: EUR
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0006
+  family: structured-extraction
+  split: private
+  input:
+    document: "INVOICE 55014\nFrom: Kestrel Couriers\nIssued: 18.04.2026\n\n  same-day delivery, 42.00\n\
+      \nSubtotal: €42.00\nVAT: €8.40\nTotal: €50.40\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '55014'
+      vendor: Kestrel Couriers
+      issued: '2026-04-18'
+      net: 42.0
+      tax: 8.4
+      total: 50.4
+      currency: EUR
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0007
+  family: structured-extraction
+  split: public
+  input:
+    document: 'Invoice X-9
+
+      From: Lumen Electrical
+
+      Issued: 6 May 2026
+
+      Due: 5 June 2026
+
+      PO: 4417-A
+
+
+      Subtotal: $310.00
+
+      VAT: $77.50
+
+      Total: $387.50
+
+
+      Questions about this invoice: billing@lumen.example.
+
+      '
+    schema: &id003
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: X-9
+      vendor: Lumen Electrical
+      issued: '2026-05-06'
+      due: '2026-06-05'
+      net: 310.0
+      tax: 77.5
+      total: 387.5
+      currency: USD
+      po_number: 4417-A
+    weights:
+      total: 2
+  - type: schema
+    schema: *id003
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0008
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice 0314\nFrom: Marlow & Sons\nIssued: 2026-05-21\n\n  1 × label roll, 5.50\n\nSubtotal:\
+      \ £5.50\nVAT: £1.10\nTotal: £6.60\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '0314'
+      vendor: Marlow & Sons
+      issued: '2026-05-21'
+      net: 5.5
+      tax: 1.1
+      total: 6.6
+      currency: GBP
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0009
+  family: structured-extraction
+  split: public
+  input:
+    document: "Invoice CN-1102\nFrom: Northwind Tools\nIssued: 20 March 2026\n\nSubtotal: €-64.58\nVAT:\
+      \ €-12.92\nTotal: €-77.50\n  this is a credit note: the amount is owed back to the customer\n\n\
+      Credit for invoice 4471.\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: CN-1102
+      vendor: Northwind Tools
+      issued: '2026-03-20'
+      net: -64.58
+      tax: -12.92
+      total: -77.5
+      currency: EUR
+      credit: true
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0010
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice\nFrom: Bramblewood Supplies\nIssued: 27 March 2026\n\n  replacement parts, 220.00\n\
+      \nSubtotal: €220.00\nVAT: €55.00\nTotal: €275.00\n\nNo invoice number has been assigned to this\
+      \ document.\n"
+    schema: &id004
+      type: object
+      required:
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      vendor: Bramblewood Supplies
+      issued: '2026-03-27'
+      net: 220.0
+      tax: 55.0
+      total: 275.0
+      currency: EUR
+    weights:
+      total: 2
+  - type: schema
+    schema: *id004
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0011
+  family: structured-extraction
+  split: public
+  input:
+    document: 'Invoice 70041
+
+      From: Fenwick Print
+
+      Issued: 09.04.2026
+
+
+      Subtotal: €480.00
+
+      VAT: €115.20
+
+      Total: €595.20
+
+
+      VAT at 24% is charged on the subtotal, 115.20, and is included in the total.
+
+      '
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '70041'
+      vendor: Fenwick Print
+      issued: '2026-04-09'
+      net: 480.0
+      tax: 115.2
+      total: 595.2
+      currency: EUR
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0012
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice 93005\nFrom: Atlas Hardware\nIssued: 23 April 2026\nDue: 23 May 2026\n\n  parts,\
+      \ 400.00\n  loyalty discount, -24.00\n\nSubtotal: €400.00\nVAT: €96.00\nTotal: €472.00\n\nThe total\
+      \ reflects a 24.00 discount taken off the subtotal.\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '93005'
+      vendor: Atlas Hardware
+      issued: '2026-04-23'
+      due: '2026-05-23'
+      net: 400.0
+      tax: 96.0
+      total: 472.0
+      currency: EUR
+      discount: 24.0
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0013
+  family: structured-extraction
+  split: public
+  input:
+    document: "Statement for the period 1–31 May 2026.\n\nInvoice INV/2026/88\nFrom: Meridian Cloud\n\
+      Issued: 2026-05-01\nDue: 2026-05-31\n\n  compute, 2100.00\n  storage, 700.00\n  egress, 450.00\n\
+      \nSubtotal: 3,250.00\nVAT: 812.50\nTotal: 4,062.50\n\nPayable within 30 days of issue.\n"
+    schema: &id005
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: INV/2026/88
+      vendor: Meridian Cloud
+      issued: '2026-05-01'
+      due: '2026-05-31'
+      net: 3250.0
+      tax: 812.5
+      total: 4062.5
+      currency: USD
+    weights:
+      total: 2
+  - type: schema
+    schema: *id005
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0014
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice 5541\nFrom: Sable Catering\nIssued: 14.05.2026\nPO: PO-8801\n\n  lunch service,\
+      \ 810.00\n\nSubtotal: 810.00\nVAT: 202.50\nTotal: 1,012.50\n"
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: '5541'
+      vendor: Sable Catering
+      issued: '2026-05-14'
+      net: 810.0
+      tax: 202.5
+      total: 1012.5
+      currency: SEK
+      po_number: PO-8801
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0015
+  family: structured-extraction
+  split: public
+  input:
+    document: 'INVOICE b-2026-0777
+
+      From: Tidewater Legal
+
+      Issued: 2 June 2026
+
+      Due: 2 July 2026
+
+      PO: 4417-B
+
+
+      Subtotal: £5,000.00
+
+      VAT: £1,250.00
+
+      Total: £6,250.00
+
+
+      Late payment interest may apply.
+
+      '
+    schema:
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: b-2026-0777
+      vendor: Tidewater Legal
+      issued: '2026-06-02'
+      due: '2026-07-02'
+      net: 5000.0
+      tax: 1250.0
+      total: 6250.0
+      currency: GBP
+      po_number: 4417-B
+    weights:
+      total: 2
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.
+- id: ext-0016
+  family: structured-extraction
+  split: private
+  input:
+    document: "Invoice 2200-16\nFrom: Ridgeway Coffee\nIssued: 2026-06-11\n\n  office coffee, 96.00\n\n\
+      Subtotal: €96.00\nVAT: €23.04\nTotal: €119.04\n\nNet 14.\n"
+    schema: &id006
+      type: object
+      required:
+      - invoice_id
+      - vendor
+      - total
+      - currency
+      properties:
+        invoice_id:
+          type: string
+        vendor:
+          type: string
+        issued:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        due:
+          type: string
+          pattern: ^\d{4}-\d{2}-\d{2}$
+        net:
+          type: number
+        tax:
+          type: number
+        total:
+          type: number
+        po_number:
+          type: string
+        currency:
+          type: string
+          enum:
+          - EUR
+          - USD
+          - GBP
+          - SEK
+      additionalProperties: false
+    style: extraction
+  expectations:
+  - type: fields
+    values:
+      invoice_id: 2200-16
+      vendor: Ridgeway Coffee
+      issued: '2026-06-11'
+      net: 96.0
+      tax: 23.04
+      total: 119.04
+      currency: EUR
+    weights:
+      total: 2
+  - type: schema
+    schema: *id006
+    fenced: true
+  tags:
+  - documents
+  - extraction
+  limits:
+    max_steps: 3
+  budget:
+    max_usd: 0.06
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An invoice in the shape one company sends and not the shape the extractor was written against: the same values, dressed differently, which is where field-level extraction actually fails.

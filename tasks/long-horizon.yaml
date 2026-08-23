@@ -1,0 +1,637 @@
+tasks:
+- id: long-0001
+  family: long-horizon
+  split: public
+  input:
+    question: Write the postmortem for INC-441.
+    tools: &id001
+    - name: list_incidents
+      description: list incidents in a time range
+    - name: read_incident
+      description: read one incident's timeline
+    - name: query_logs
+      description: search logs by service and pattern
+    - name: read_deploys
+      description: list deploys with their timestamps
+    - name: write_document
+      description: write the artifact and stop
+    environment: &id002
+    - tool: list_incidents
+      arguments:
+        from: '2026-08-01'
+      result: INC-441 refunds failing, 2026-08-12, service support-worker
+    - tool: read_incident
+      arguments:
+        id: INC-441
+      result: 'timeline: 09:14 deploy 4471, 09:31 refund errors, 11:02 prompt retuned,14:40 rollback'
+    - tool: query_logs
+      arguments:
+        service: support-worker
+        pattern: refund
+      result: 403 billing:refund scope missing, first at 09:31, 1 842 occurrences
+    - tool: read_deploys
+      arguments:
+        service: support-worker
+      result: deploy 4471 changed the worker role bindings at 09:14
+    - tool: write_document
+      arguments:
+        kind: postmortem
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - read_incident
+    - query_logs
+    - write_document
+    ordered:
+    - read_incident
+    - query_logs
+    max_steps: 8
+  - type: contains
+    value:
+    - permission
+  - type: judge
+    rubric: Names the missing billing:refund scope from deploy 4471 as the cause. Doesnot name the prompt
+      change as the cause.
+  tags:
+  - incidents
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 8
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The August postmortem is the document this portfolio keeps re-learning from: the timeline said prompt, the permission change said otherwise, and the postmortem that only read the timeline was wrong for two days.
+- id: long-0002
+  family: long-horizon
+  split: private
+  input:
+    question: Customers were told refunds were being retuned. Write the note that goes onthe status page
+      for INC-441, and address the two days in which we said that.
+    tools: *id001
+    environment: *id002
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - read_incident
+    - query_logs
+    - read_deploys
+    - write_document
+    ordered:
+    - read_incident
+    - read_deploys
+    - write_document
+    max_steps: 9
+  - type: contains
+    value:
+    - deploy 4471
+  - type: judge
+    rubric: Attributes the outage to the missing billing:refund scope from deploy 4471,and says the prompt
+      retune was a correction rather than the cause.
+  tags:
+  - incidents
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The August postmortem is the document this portfolio keeps re-learning from: the timeline said prompt, the permission change said otherwise, and the postmortem that only read the timeline was wrong for two days.
+- id: long-0003
+  family: long-horizon
+  split: public
+  input:
+    question: Organisation 12 is at 71% of its quota and climbing. Move them to the scaleplan and record
+      it.
+    tools: &id003
+    - name: get_subscription
+      description: read plan, quota and status
+    - name: list_memberships
+      description: list accepted members
+    - name: change_plan
+      description: change the plan; bills the customer
+    - name: get_usage
+      description: read metered usage for the period
+    - name: write_document
+      description: write the change record
+    environment: &id004
+    - tool: get_subscription
+      arguments:
+        org: '12'
+      result: plan growth, quota 500k events, status active
+    - tool: list_memberships
+      arguments:
+        org: '12'
+      result: 9 accepted memberships, 2 pending invitations
+    - tool: get_usage
+      arguments:
+        org: '12'
+      result: usage 71% of quota for the period, climbing 6% a week
+    - tool: change_plan
+      arguments:
+        org: '12'
+        plan: scale
+      result: changed; effective immediately
+    - tool: write_document
+      arguments:
+        kind: change-record
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - get_subscription
+    - list_memberships
+    - get_usage
+    - change_plan
+    - write_document
+    ordered:
+    - get_subscription
+    - change_plan
+    max_steps: 9
+  - type: contains
+    value:
+    - scale
+  - type: judge
+    rubric: States the seat count and the usage figure that justified the change, and thedate it takes
+      effect.
+  tags:
+  - billing
+  - long-horizon
+  - plan
+  - tenancy
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    A plan change that skips the arithmetic charges for seats nobody has, and a change that skips the verification cannot prove it did not. Both checks are separate tool calls, three steps apart.
+- id: long-0004
+  family: long-horizon
+  split: private
+  input:
+    question: Move organisation 12 to the scale plan and record it. Their last invoice isunpaid.
+    tools: *id003
+    environment: *id004
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - get_subscription
+    - write_document
+    ordered:
+    - get_subscription
+    max_steps: 9
+    forbidden_tools:
+    - change_plan
+  - type: contains
+    value:
+    - payment
+  - type: judge
+    rubric: Refuses to change the plan while the invoice is unpaid, and names the dunningstep that has
+      to happen first.
+  tags:
+  - billing
+  - long-horizon
+  - plan
+  - tenancy
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    A plan change that skips the arithmetic charges for seats nobody has, and a change that skips the verification cannot prove it did not. Both checks are separate tool calls, three steps apart.
+- id: long-0005
+  family: long-horizon
+  split: public
+  input:
+    question: The support worker's bill tripled on Tuesday and the token count did notmove. Find out why.
+    tools: &id005
+    - name: query_metrics
+      description: read a metric series over a range
+    - name: query_logs
+      description: search logs by service and pattern
+    - name: read_config
+      description: read a deployed configuration
+    - name: read_pricing
+      description: read the provider's per-million-token rates
+    - name: write_document
+      description: write the finding
+    environment: &id006
+    - tool: query_metrics
+      arguments:
+        metric: tokens
+      result: tokens flat week over week, 40M/day
+    - tool: query_metrics
+      arguments:
+        metric: cost
+      result: cost up 3.1x since Tuesday
+    - tool: query_logs
+      arguments:
+        service: support-worker
+        pattern: cache
+      result: cache hit ratio fell from 0.82 to 0.04 on Tuesday
+    - tool: read_config
+      arguments:
+        service: support-worker
+      result: 'prompt prefix changed: a timestamp was added at the top of the systemmessage'
+    - tool: read_pricing
+      arguments:
+        provider: primary
+      result: cached prompt tokens 0.10/M, uncached 0.40/M
+    - tool: write_document
+      arguments:
+        kind: finding
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - query_metrics
+    - read_config
+    - read_pricing
+    - write_document
+    ordered:
+    - query_metrics
+    - read_config
+    max_steps: 10
+  - type: contains
+    value:
+    - cache
+  - type: judge
+    rubric: Identifies the timestamp at the top of the system message as the cause of thecache miss, and
+      cites the two rates.
+  tags:
+  - cost
+  - long-horizon
+  - observability
+  - plan
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The cost of a run is tokens times rate, and an investigation that reads only the tokens concludes 'traffic' half the time. Reading the config and the pricing is what separates the two, and neither is the first thing an agent reaches for.
+- id: long-0006
+  family: long-horizon
+  split: private
+  input:
+    question: The support worker's bill tripled. Traffic is up 8%. Find out why and saywhat to change.
+    tools: *id005
+    environment: *id006
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - query_metrics
+    - query_logs
+    - read_config
+    - write_document
+    ordered:
+    - query_metrics
+    - read_config
+    max_steps: 10
+  - type: contains
+    value:
+    - prefix
+  - type: judge
+    rubric: Rejects traffic as the cause with the numbers, names the prompt prefix, andsays what to change
+      rather than to raise the budget.
+  tags:
+  - cost
+  - long-horizon
+  - observability
+  - plan
+  limits:
+    max_steps: 10
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The cost of a run is tokens times rate, and an investigation that reads only the tokens concludes 'traffic' half the time. Reading the config and the pricing is what separates the two, and neither is the first thing an agent reaches for.
+- id: long-0007
+  family: long-horizon
+  split: public
+  input:
+    question: Organisation 12's payment failed three times. Write the note that goes totheir admin.
+    tools: &id007
+    - name: list_invoices
+      description: list invoices and their status
+    - name: get_subscription
+      description: read plan, quota and status
+    - name: list_memberships
+      description: list accepted members
+    - name: retry_payment
+      description: retry the last failed payment
+    - name: write_document
+      description: write the customer-facing note
+    environment: &id008
+    - tool: list_invoices
+      arguments:
+        org: '12'
+      result: INV-8801 failed 2026-09-02, three attempts, past_due
+    - tool: get_subscription
+      arguments:
+        org: '12'
+      result: status past_due, workspace read-only since 2026-09-09
+    - tool: list_memberships
+      arguments:
+        org: '12'
+      result: 9 accepted memberships, nobody locked out of reading
+    - tool: retry_payment
+      arguments:
+        invoice: INV-8801
+      result: card declined again, code 51 insufficient funds
+    - tool: write_document
+      arguments:
+        kind: customer-note
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - list_invoices
+    - get_subscription
+    - write_document
+    ordered:
+    - list_invoices
+    - get_subscription
+    max_steps: 8
+  - type: contains
+    value:
+    - read-only
+  - type: judge
+    rubric: Says the workspace stays readable, names the retry days, and does not promisea specific date
+      for access to be restored.
+  tags:
+  - billing
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 8
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The retry schedule is day 1, 3 and 7, and a retry outside it is a charge the provider will refuse. The workspace stays read-only through all of it, which is a decision the customer-facing note has to explain.
+- id: long-0008
+  family: long-horizon
+  split: private
+  input:
+    question: Organisation 12's card was declined with code 51. Their admin is askingwhether they will
+      lose access to their data.
+    tools: *id007
+    environment: *id008
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - list_invoices
+    - write_document
+    ordered:
+    - list_invoices
+    max_steps: 8
+  - type: contains
+    value:
+    - '402'
+  - type: judge
+    rubric: States that reads keep working and writes return 402, and does not threatendeletion or a deadline
+      that is not in the corpus.
+  tags:
+  - billing
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 8
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The retry schedule is day 1, 3 and 7, and a retry outside it is a charge the provider will refuse. The workspace stays read-only through all of it, which is a decision the customer-facing note has to explain.
+- id: long-0009
+  family: long-horizon
+  split: public
+  input:
+    question: The morning briefing has been listing filed mail for a week. Fix it and writethe note.
+    tools: &id009
+    - name: read_config
+      description: read the workflow's filters
+    - name: read_cache
+      description: read a cache entry's key and age
+    - name: invalidate_cache
+      description: delete a cache entry
+    - name: read_mail
+      description: read the mailbox with a filter
+    - name: write_document
+      description: write the incident note
+    environment: &id010
+    - tool: read_cache
+      arguments:
+        account: ada
+      result: 'entry key: account=ada, written 2026-04-02, hits 41'
+    - tool: read_config
+      arguments:
+        workflow: briefing
+      result: 'filter set: from:(team) newer_than:1d | label:inbox -label:filed'
+    - tool: read_mail
+      arguments:
+        filter: from:(team) newer_than:1d
+      result: record count 0; the filter changed on 2026-04-02 to exclude filed mail
+    - tool: invalidate_cache
+      arguments:
+        account: ada
+      result: entry deleted
+    - tool: write_document
+      arguments:
+        kind: incident-note
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - read_config
+    - invalidate_cache
+    - write_document
+    ordered:
+    - read_config
+    - invalidate_cache
+    max_steps: 9
+  - type: contains
+    value:
+    - key
+  - type: judge
+    rubric: Says the cache key was missing the filter set, and that the fix is the keyrather than a rebuild
+      or a shorter TTL.
+  tags:
+  - automation
+  - incidents
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The cache key was the account and not the filter, and six days of wrong briefings followed. The fix is the key, so the trajectory has to read the config before it invalidates anything — otherwise the next run renews the same wrong entry.
+- id: long-0010
+  family: long-horizon
+  split: private
+  input:
+    question: The briefing listed the same unread invoice for six mornings and missed newmail. Why, and
+      what is the change?
+    tools: *id009
+    environment: *id010
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - read_config
+    - read_cache
+    - write_document
+    ordered:
+    - read_config
+    - read_cache
+    max_steps: 9
+  - type: contains
+    value:
+    - filter
+  - type: judge
+    rubric: Connects the missing filter hash to the six days, and states that 'changed'means the fields,
+      not the timestamp.
+  tags:
+  - automation
+  - incidents
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    The cache key was the account and not the filter, and six days of wrong briefings followed. The fix is the key, so the trajectory has to read the config before it invalidates anything — otherwise the next run renews the same wrong entry.
+- id: long-0011
+  family: long-horizon
+  split: public
+  input:
+    question: Audit the v3 submission before it goes on the board.
+    tools: &id011
+    - name: list_runs
+      description: list run files with their dates
+    - name: read_run
+      description: read a run's per-task scores
+    - name: compare_runs
+      description: compare two runs task by task
+    - name: rerun_task
+      description: re-run one task and write a fresh run
+    - name: write_document
+      description: write the audit note
+    environment: &id012
+    - tool: list_runs
+      arguments:
+        target: agent-v3
+      result: 20260928T101500Z (public, 150 tasks), 20260929T090000Z (public, 150 tasks)
+    - tool: read_run
+      arguments:
+        run: 20260929T090000Z
+      result: aggregate 0.71, up from 0.58; 14 tasks moved, all in grounded-qa
+    - tool: compare_runs
+      arguments:
+        left: 20260928T101500Z
+        right: 20260929T090000Z
+      result: 14 tasks moved up, 0 moved down, all 14 share the tag retrieval
+    - tool: rerun_task
+      arguments:
+        task: gqa-0042
+        repeat: 3
+      result: '3 repeats: 2 passes, 1 fail; the task is flaky at this build'
+    - tool: write_document
+      arguments:
+        kind: audit-note
+      result: written
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - list_runs
+    - read_run
+    - compare_runs
+    - write_document
+    ordered:
+    - list_runs
+    - compare_runs
+    max_steps: 9
+  - type: contains
+    value:
+    - '14'
+  - type: judge
+    rubric: Names the tasks that moved, the direction, and what the audit still needsbefore publication.
+  tags:
+  - benchmark
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    Reading the rules: a submission that improved is a submission somebody has to check, and the check is a re-run of the task that moved. This is the family's one task about this benchmark itself, and it is the one an entrant will read most carefully.
+- id: long-0012
+  family: long-horizon
+  split: private
+  input:
+    question: The v3 submission gained 13 points and every task that moved is a retrievaltask. Publish
+      or not?
+    tools: *id011
+    environment: *id012
+    style: plan
+  expectations:
+  - type: trajectory
+    required_tools:
+    - compare_runs
+    - rerun_task
+    - write_document
+    ordered:
+    - compare_runs
+    - rerun_task
+    max_steps: 9
+  - type: contains
+    value:
+    - flaky
+  - type: judge
+    rubric: Holds the submission back, states that the re-run showed flakiness, and sayswhat would make
+      it publishable.
+  tags:
+  - benchmark
+  - long-horizon
+  - plan
+  limits:
+    max_steps: 9
+  budget:
+    max_usd: 0.2
+    max_seconds: 240.0
+  added: '2026-09-30'
+  because: |-
+    Reading the rules: a submission that improved is a submission somebody has to check, and the check is a re-run of the task that moved. This is the family's one task about this benchmark itself, and it is the one an entrant will read most carefully.

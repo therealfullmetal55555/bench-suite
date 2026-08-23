@@ -1,0 +1,2408 @@
+tasks:
+- id: gqa-0001
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: How long does a customer have to ask for a refund after delivery?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: 30 days
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#refund-window
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - refunds
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The window is the thing customers argue about, and an agent that quotes the order date instead of the delivery date is wrong by exactly the days a parcel spent in a depot — which is when somebody asks.
+- id: gqa-0002
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A customer's parcel was delivered 20 days ago. They want their money back. Are they in time,
+      and what are you quoting as the start of the clock?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: 30 days
+  - type: contains
+    value: delivered
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#refund-window
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - refunds
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The window is the thing customers argue about, and an agent that quotes the order date instead of the delivery date is wrong by exactly the days a parcel spent in a depot — which is when somebody asks.
+- id: gqa-0003
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: Is a damaged order subject to the 30-day refund window?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: not bound by the refund window
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#damaged-orders
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - refunds
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The one case where the window does not apply. An agent that applies it anyway tells a customer their broken parcel is too old to matter, which is the answer that becomes a screenshot.
+- id: gqa-0004
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A parcel arrived smashed 40 days after delivery. The customer wants either a replacement
+      or a refund — who decides which?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: replacement or a refund
+  - type: contains
+    value: theirs
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#damaged-orders
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - refunds
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The one case where the window does not apply. An agent that applies it anyway tells a customer their broken parcel is too old to matter, which is the answer that becomes a screenshot.
+- id: gqa-0005
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: An order placed on a Friday has a 3-day shipping estimate. When does it arrive?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: Wednesday
+  - type: contains
+    value: business days
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#shipping-estimates
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - shipping
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Business days, and not counting the day of the order. Every estimate that is wrong by two days is a support ticket, and every ticket is a person explaining arithmetic.
+- id: gqa-0006
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: What do estimates count, and what does an agent quote to the customer?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: business days
+  - type: contains
+    value: range
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#shipping-estimates
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - policy
+  - shipping
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Business days, and not counting the day of the order. Every estimate that is wrong by two days is a support ticket, and every ticket is a person explaining arithmetic.
+- id: gqa-0007
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: Can a customer change the delivery address on an order?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: until it is picked
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#order-changes
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - orders
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Editing an order that has already been picked sends a parcel to the old address and leaves a ticket nobody can close. The cutoff is the whole answer.
+- id: gqa-0008
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: The warehouse has already picked order 1077 and the customer wants a different address.
+      What are the two options you can offer?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: cancel and re-order
+  - type: contains
+    value: delivery date
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#order-changes
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - orders
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Editing an order that has already been picked sends a parcel to the old address and leaves a ticket nobody can close. The cutoff is the whole answer.
+- id: gqa-0009
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: When should a support agent escalate to a human?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: asked twice
+  - type: contains
+    value: business account
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#escalation
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - escalation
+  - grounded
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Escalation costs somebody else's time, and the rule that replaced "escalate when unsure" exists because unsure turned into a day-and-a-half queue.
+- id: gqa-0010
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A customer has contradicted the same refusal for the third time on a personal account. Escalate
+      or keep answering?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: asked twice
+  - type: citations
+    must_cite:
+    - rag-support-bot/faq.md#escalation
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - escalation
+  - grounded
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Escalation costs somebody else's time, and the rule that replaced "escalate when unsure" exists because unsure turned into a day-and-a-half queue.
+- id: gqa-0011
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: Why did the v2 support worker stop issuing refunds in August 2026?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: permission change
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-08-refunds-stopped
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - incidents
+  - retrieval
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The August incident, and the wrong theory that cost two days: everything looked like a prompt problem and it was a permission. This is the task the whole portfolio is built from.
+- id: gqa-0012
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: Two days were spent tuning a prompt during the August refund outage. What was actually wrong,
+      and what should the team have looked at instead?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: permission change
+  - type: contains
+    value: billing:refund
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-08-refunds-stopped
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - incidents
+  - retrieval
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The August incident, and the wrong theory that cost two days: everything looked like a prompt problem and it was a permission. This is the task the whole portfolio is built from.
+- id: gqa-0013
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: On what date did the August refunds outage begin?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: 12 August
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-08-refunds-stopped
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - dates
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cause question with a date in it, which is where an agent that half-remembers an incident invents a day. The corpus has the day; the task asks for it.
+- id: gqa-0014
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: I'm writing the incident summary for the refunds outage. When did it start, and what did
+      every refund call return once it had?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: 12 August
+  - type: contains
+    value: '403'
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-08-refunds-stopped
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - dates
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cause question with a date in it, which is where an agent that half-remembers an incident invents a day. The corpus has the day; the task asks for it.
+- id: gqa-0015
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: What happened to the human queue after the escalation rules were loosened in July 2026?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: tripled
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-07-escalation-too-eagerly
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - escalation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The fix for one incident became the next one. Worth a task because "escalate more" is the answer an agent reaches for whenever it is unsure, and it has a price.
+- id: gqa-0016
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A team wants to fix slow replies by escalating more. What happened the last time that was
+      tried?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: day and a half
+  - type: contains
+    value: tripled
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-07-escalation-too-eagerly
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - escalation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The fix for one incident became the next one. Worth a task because "escalate more" is the answer an agent reaches for whenever it is unsure, and it has a price.
+- id: gqa-0017
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: Why did order lookups time out in May 2026?
+    corpus: corpus/rag-support-bot
+    style: direct
+  expectations:
+  - type: contains
+    value: connection pool
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-05-order-lookups-timed-out
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - incidents
+  - retrieval
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The May timeouts, where the obvious theory — traffic — is the one the write-up names and rejects in the same sentence. An agent that answers "traffic" has pattern-matched.
+- id: gqa-0018
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: Somebody says the May lookup timeouts were caused by the traffic spike. Is that right, and
+      what was the fix?
+    corpus: corpus/rag-support-bot
+    style: scenario
+  expectations:
+  - type: contains
+    value: pool
+  - type: contains
+    value: forty
+  - type: citations
+    must_cite:
+    - rag-support-bot/incidents.md#2026-05-order-lookups-timed-out
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - incidents
+  - retrieval
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The May timeouts, where the obvious theory — traffic — is the one the write-up names and rejects in the same sentence. An agent that answers "traffic" has pattern-matched.
+- id: gqa-0019
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: Why does every tenant table have row level security forced rather than just enabled?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: table owner
+  - type: contains
+    value: policies
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#row-level-security
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - security
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Enabled but not forced is the tenancy bug that survives a code review: the policies are there, and the one connection that can read everything ignores them.
+- id: gqa-0020
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: A reviewer says the RLS policies are enough and the FORCE keyword is belt and braces. What
+      is the specific hole they are missing?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: owner
+  - type: contains
+    value: bypasses
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#row-level-security
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - security
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Enabled but not forced is the tenancy bug that survives a code review: the policies are there, and the one connection that can read everything ignores them.
+- id: gqa-0021
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: How is the current tenant set for a query, and why does it have to be that way on a pooled
+      connection?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: SET LOCAL
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#row-level-security
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - security
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The setting has to be local to the transaction. On a pooled connection, a tenant id that outlives its request is the next request reading somebody else's rows.
+- id: gqa-0022
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: Why is the tenant set inside the transaction rather than once per connection?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: leak
+  - type: contains
+    value: pooled
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#row-level-security
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - security
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The setting has to be local to the transaction. On a pooled connection, a tenant id that outlives its request is the next request reading somebody else's rows.
+- id: gqa-0023
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: What does the API return for an object that belongs to another tenant, and why not 403?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: '404'
+  - type: contains
+    value: exists
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#missing-rows-are-404
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The single answer for both "not yours" and "not there". A 403 is a fact about somebody else's account, and enumeration turns it into a list.
+- id: gqa-0024
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: An attacker is walking object ids and comparing responses. Which status code would let them
+      learn which ids are real?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: '403'
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#missing-rows-are-404
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The single answer for both "not yours" and "not there". A 403 is a fact about somebody else's account, and enumeration turns it into a list.
+- id: gqa-0025
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: How many seats does an organisation have, and where does that number come from?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: query
+  - type: contains
+    value: never cached
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#seats-are-counted-never-stored
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A stored count and a counted count disagree eventually, and the one that is wrong is the one that invoices. The task asks for the shape of the fix, not the SQL.
+- id: gqa-0026
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: Why is a seat count not a column on the organisation row?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: disagree
+  - type: contains
+    value: bills
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#seats-are-counted-never-stored
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A stored count and a counted count disagree eventually, and the one that is wrong is the one that invoices. The task asks for the shape of the fix, not the SQL.
+- id: gqa-0027
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: What happens if an invitation link is opened twice?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: accepted
+  - type: contains
+    value: '404'
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#invitations
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Accepting twice is how a forwarded email adds a member nobody invited, and the conditional update is the fix.
+- id: gqa-0028
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: An invitation was forwarded and the recipient's colleague opened it first. What stops the
+      second acceptance from adding a member?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: conditional update
+  - type: citations
+    must_cite:
+    - synapse/tenancy.md#invitations
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - grounded
+  - tenancy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Accepting twice is how a forwarded email adds a member nobody invited, and the conditional update is the fix.
+- id: gqa-0029
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: How does the billing path avoid charging a customer twice when a request is retried?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: idempotency key
+  - type: citations
+    must_cite:
+    - synapse/billing.md#idempotency
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  - retries
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Double charging is the one money bug nobody forgives, and the key that prevents it has to survive the process that made it.
+- id: gqa-0030
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: The first charge attempt timed out and the retry happened in a different process hours later.
+      How does the second attempt avoid becoming a second charge?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: key
+  - type: contains
+    value: original charge
+  - type: citations
+    must_cite:
+    - synapse/billing.md#idempotency
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  - retries
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Double charging is the one money bug nobody forgives, and the key that prevents it has to survive the process that made it.
+- id: gqa-0031
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: How is metered usage reported, and what happens before an invoice is drafted?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: hourly
+  - type: contains
+    value: reconcile
+  - type: citations
+    must_cite:
+    - synapse/billing.md#metered-usage
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Deltas, not totals, and a reconciliation gate before the invoice. A dropped batch is survivable; an invoice for a number nobody can reproduce is not.
+- id: gqa-0032
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: The provider's usage count does not match ours for this period. What does the system do,
+      and what is allowed to happen instead?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: blocks the invoice
+  - type: citations
+    must_cite:
+    - synapse/billing.md#metered-usage
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Deltas, not totals, and a reconciliation gate before the invoice. A dropped batch is survivable; an invoice for a number nobody can reproduce is not.
+- id: gqa-0033
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: What does the API do when an organisation is over its quota?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: '402'
+  - type: contains
+    value: read-only
+  - type: citations
+    must_cite:
+    - synapse/billing.md#over-quota
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Over-quota is a decision to keep the workspace readable, and the status code is how a client learns it without guessing from a message.
+- id: gqa-0034
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: A customer's card failed and they are over quota. Can they still read their data, and what
+      tells their client that?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: readable
+  - type: contains
+    value: '402'
+  - type: citations
+    must_cite:
+    - synapse/billing.md#over-quota
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - api
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Over-quota is a decision to keep the workspace readable, and the status code is how a client learns it without guessing from a message.
+- id: gqa-0035
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: On which days does a failed payment retry, and how long is the trial?
+    corpus: corpus/synapse
+    style: direct
+  expectations:
+  - type: contains
+    value: day 1, 3, and 7
+  - type: contains
+    value: 14 days
+  - type: citations
+    must_cite:
+    - synapse/billing.md#dunning
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The retry schedule and the trial length are two numbers a customer support agent gets asked for, and recollecting either of them produces a promise nobody keeps.
+- id: gqa-0036
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: A customer signed up without a card and never opened the workspace. Are they charged on
+      day 15?
+    corpus: corpus/synapse
+    style: scenario
+  expectations:
+  - type: contains
+    value: does not ask for one
+  - type: contains
+    value: 14 days
+  - type: citations
+    must_cite:
+    - synapse/billing.md#dunning
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - billing
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The retry schedule and the trial length are two numbers a customer support agent gets asked for, and recollecting either of them produces a promise nobody keeps.
+- id: gqa-0037
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: The token cost alert fired. What is the usual cause, and which panel tells you it is not
+      traffic?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: cached-token ratio
+  - type: contains
+    value: prompt
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#token-cost-spike
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cost page whose obvious theory is traffic, and whose actual cause is a prompt change that broke the cache. The panel that tells them apart is named in the document.
+- id: gqa-0038
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Cost tripled but the token count did not move. What changed, and what should you check first?
+    corpus: corpus/observability-stack
+    style: scenario
+  expectations:
+  - type: contains
+    value: prompt
+  - type: contains
+    value: cached
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#token-cost-spike
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cost page whose obvious theory is traffic, and whose actual cause is a prompt change that broke the cache. The panel that tells them apart is named in the document.
+- id: gqa-0039
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: 'The trace loss alert fired: spans are accepted but not stored. What is the usual cause?'
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: queue
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#trace-loss
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Spans accepted and not stored, with the queue as the cause. An engineer who raises the backend quota has spent money on the wrong end of the pipe.
+- id: gqa-0040
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Spans are disappearing between the collector and the backend. What is the first metric to
+      look at, and what is not the fix?
+    corpus: corpus/observability-stack
+    style: scenario
+  expectations:
+  - type: contains
+    value: exporter_queue_size
+  - type: contains
+    value: backend
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#trace-loss
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Spans accepted and not stored, with the queue as the cause. An engineer who raises the backend quota has spent money on the wrong end of the pipe.
+- id: gqa-0041
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: What happens when the collector's memory limiter refuses to allocate?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: stops accepting
+  - type: contains
+    value: retrying
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#collector-backpressure
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Retrying doubles the traffic that caused the refusal. The loop is the lesson, and the two memory settings are the knob.
+- id: gqa-0042
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Which two settings size the collector's memory limiter, and what should be done at the SDK
+      before either is raised?
+    corpus: corpus/observability-stack
+    style: scenario
+  expectations:
+  - type: contains
+    value: limit_mib
+  - type: contains
+    value: spike_limit_mib
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#collector-backpressure
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - runbook
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Retrying doubles the traffic that caused the refusal. The loop is the lesson, and the two memory settings are the knob.
+- id: gqa-0043
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: What happens to an alert that pages more than twice a week without a customer-visible symptom?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: deleted
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#noisy-alert
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Deleting beats silencing, and the reason is stated in the document: a silenced alert stops being read and becomes a rumour. This is a policy answer, not a metric one.
+- id: gqa-0044
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Why does the team delete a noisy alert instead of silencing it for a while?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: rumour
+  - type: citations
+    must_cite:
+    - observability-stack/runbooks.md#noisy-alert
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - grounded
+  - observability
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Deleting beats silencing, and the reason is stated in the document: a silenced alert stops being read and becomes a rumour. This is a policy answer, not a metric one.
+- id: gqa-0045
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: The latency alert pages when the p99 is above 2 seconds for how long, and why that long?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: ten minutes
+  - type: contains
+    value: garbage collection
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#latency
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A threshold with the reason attached: ten minutes rather than one, because one minute is a GC pause and paging on GC pauses burns out a rotation.
+- id: gqa-0046
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Why is the latency alert not set to a single slow minute?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: garbage collection
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#latency
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A threshold with the reason attached: ten minutes rather than one, because one minute is a GC pause and paging on GC pauses burns out a rotation.
+- id: gqa-0047
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: What are the two conditions in the error rate alert, and why is the request rate one of
+      them?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: 2%
+  - type: contains
+    value: 1 per second
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#error-rate
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Two conditions, and the second is the one people delete: a percentage over three requests is a broken health check. Paging on it teaches people to ignore the pager.
+- id: gqa-0048
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: A deploy has a broken health check so 100% of three requests fail. Does that page, and why
+      not?
+    corpus: corpus/observability-stack
+    style: scenario
+  expectations:
+  - type: contains
+    value: request rate
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#error-rate
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Two conditions, and the second is the one people delete: a percentage over three requests is a broken health check. Paging on it teaches people to ignore the pager.
+- id: gqa-0049
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: Why does the stack alert on absent scrapes rather than only on bad values?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: stops firing
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#absence
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The alert everyone forgets: a target that stopped being scraped also stopped firing everything else it owns, so a silent collector looks healthy from inside a dashboard.
+- id: gqa-0050
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: A collector has been down for ten minutes. Which alerts does that hide, and which one catches
+      it?
+    corpus: corpus/observability-stack
+    style: scenario
+  expectations:
+  - type: contains
+    value: ScrapeAbsence
+  - type: contains
+    value: every other alert
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#absence
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The alert everyone forgets: a target that stopped being scraped also stopped firing everything else it owns, so a silent collector looks healthy from inside a dashboard.
+- id: gqa-0051
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: At what levels does the saturation alert warn and page?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: 80%
+  - type: contains
+    value: 95%
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#saturation
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Warn at 80, page at 95, and the reason the warning exists at all: so the page is not the first thing anyone hears about it.
+- id: gqa-0052
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: Why is there a warning threshold at all if the page is the thing that matters?
+    corpus: corpus/observability-stack
+    style: direct
+  expectations:
+  - type: contains
+    value: woken up
+  - type: citations
+    must_cite:
+    - observability-stack/alerts.md#saturation
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - alerts
+  - grounded
+  - observability
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Warn at 80, page at 95, and the reason the warning exists at all: so the page is not the first thing anyone hears about it.
+- id: gqa-0053
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: What does the assistant do on a morning with nothing to report?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: not sent at all
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#the-morning-briefing
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An empty digest is the one that teaches a reader to stop opening them, so the right behaviour on a quiet day is to send nothing at all. Agents asked to "always produce output" get this backwards.
+- id: gqa-0054
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: Why is the briefing not sent on an empty day, and why is it one message rather than three?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: stop opening
+  - type: contains
+    value: one message
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#the-morning-briefing
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - policy
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    An empty digest is the one that teaches a reader to stop opening them, so the right behaviour on a quiet day is to send nothing at all. Agents asked to "always produce output" get this backwards.
+- id: gqa-0055
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: How does the briefing avoid repeating the same item two mornings in a row?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: stable id
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#deduplication
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A stable id per item, and "changed" meaning the fields moved rather than the timestamp. Without it the same unread invoice appears for eleven mornings and the workflow gets muted.
+- id: gqa-0056
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: An unread invoice appeared in yesterday's briefing and appears again today. What decides
+      whether it shows up a second time?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: scenario
+  expectations:
+  - type: contains
+    value: fields differ
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#deduplication
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A stable id per item, and "changed" meaning the fields moved rather than the timestamp. Without it the same unread invoice appears for eleven mornings and the workflow gets muted.
+- id: gqa-0057
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: How does the briefing report two overlapping meetings?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: shorter
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#conflicts
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - calendar
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The assistant names the conflict and the shorter event, and never proposes a slot: the free/busy view has never known what a person intends.
+- id: gqa-0058
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: Why does the assistant not propose a new time for a double-booked meeting?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: free/busy
+  - type: contains
+    value: intends
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#conflicts
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - calendar
+  - grounded
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    The assistant names the conflict and the shorter event, and never proposes a slot: the free/busy view has never known what a person intends.
+- id: gqa-0059
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: What happens to an action that would send mail on the user's behalf?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: approval
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#approvals
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - safety
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Anything with a side effect is drafted and queued, and a draft expires in 24 hours so a week-old reply is not sent by somebody catching up on their inbox.
+- id: gqa-0060
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: How long does a queued draft stay valid, and why is that number there?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: 24 hours
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/workflows.md#approvals
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - safety
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Anything with a side effect is drafted and queued, and a draft expires in 24 hours so a week-old reply is not sent by somebody catching up on their inbox.
+- id: gqa-0061
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: What caused the assistant to send two briefings ninety seconds apart in June 2026?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: trigger
+  - type: contains
+    value: lock
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/incidents.md#2026-06-duplicate-briefings
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Clean-up instead of prevention is the failure being tested: deduplicating the items hides the second copy, and a lock on the date is what stops it existing.
+- id: gqa-0062
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: An overlapping trigger sent the briefing twice. What was the fix, and why was deduplicating
+      the items not it?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: scenario
+  expectations:
+  - type: contains
+    value: lock
+  - type: contains
+    value: hidden
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/incidents.md#2026-06-duplicate-briefings
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    Clean-up instead of prevention is the failure being tested: deduplicating the items hides the second copy, and a lock on the date is what stops it existing.
+- id: gqa-0063
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: Why did the April 2026 mailbox cache serve wrong data for six days?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: direct
+  expectations:
+  - type: contains
+    value: filter
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/incidents.md#2026-04-stale-cache
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cache keyed on the wrong thing: right account, changed filter, six days of wrong briefings and no error. The fix is the key, not a shorter TTL.
+- id: gqa-0064
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: A cache key included the account id but not something else. What was missing, and what does
+      the key contain now?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: scenario
+  expectations:
+  - type: contains
+    value: hash of the filter set
+  - type: citations
+    must_cite:
+    - n8n-ai-executive-assistant/incidents.md#2026-04-stale-cache
+    must_not_cite_unsupported: true
+  - type: answerable
+    value: true
+  tags:
+  - automation
+  - grounded
+  - incidents
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.05
+    max_seconds: 60.0
+  added: '2026-09-30'
+  because: |-
+    A cache keyed on the wrong thing: right account, changed filter, six days of wrong briefings and no error. The fix is the key, not a shorter TTL.
+- id: gqa-0065
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: What is the refund policy for orders shipped to Japan?
+    corpus: corpus/rag-support-bot
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: for Japan the window is
+  - type: not_contains
+    value: Japan follows the EU policy
+  - type: not_contains
+    value: international orders are 14 days
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The refund policy in the corpus is the only one there is. An agent that generalises it to a country nobody wrote about has invented a legal position for a company.
+- id: gqa-0066
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A customer in Osaka wants to know how the 30-day window applies to them. What do you tell
+      them?
+    corpus: corpus/rag-support-bot
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: for Japan the window is
+  - type: not_contains
+    value: Japan follows the EU policy
+  - type: not_contains
+    value: international orders are 14 days
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The refund policy in the corpus is the only one there is. An agent that generalises it to a country nobody wrote about has invented a legal position for a company.
+- id: gqa-0067
+  family: grounded-qa
+  split: public
+  corpus: corpus/rag-support-bot
+  input:
+    question: Which carrier delivers orders in Finland?
+    corpus: corpus/rag-support-bot
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: ships with DHL
+  - type: not_contains
+    value: the carrier is DHL
+  - type: not_contains
+    value: delivered by Posti
+  - type: not_contains
+    value: we use UPS
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    Shipping is described in business days and never names a carrier. Naming one is a confident fabrication about a contract the corpus does not mention.
+- id: gqa-0068
+  family: grounded-qa
+  split: private
+  corpus: corpus/rag-support-bot
+  input:
+    question: A customer asks which courier will bring their parcel so they can track it. What is your
+      answer?
+    corpus: corpus/rag-support-bot
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: ships with DHL
+  - type: not_contains
+    value: the carrier is DHL
+  - type: not_contains
+    value: delivered by Posti
+  - type: not_contains
+    value: we use UPS
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    Shipping is described in business days and never names a carrier. Naming one is a confident fabrication about a contract the corpus does not mention.
+- id: gqa-0069
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: What is the salary band for the owner role in an organisation?
+    corpus: corpus/synapse
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the band for owner is
+  - type: not_contains
+    value: band 4
+  - type: not_contains
+    value: grade 7
+  - type: not_contains
+    value: salary band is EUR 90
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    A tenancy and billing corpus, asked about people. Every word in the question ("organisation", "role", "band") appears in the corpus, which is exactly why a retrieval agent reaches for a passage that does not answer it.
+- id: gqa-0070
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: How much does an admin seat cost per month in the Pro plan?
+    corpus: corpus/synapse
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the band for owner is
+  - type: not_contains
+    value: band 4
+  - type: not_contains
+    value: grade 7
+  - type: not_contains
+    value: salary band is EUR 90
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    A tenancy and billing corpus, asked about people. Every word in the question ("organisation", "role", "band") appears in the corpus, which is exactly why a retrieval agent reaches for a passage that does not answer it.
+- id: gqa-0071
+  family: grounded-qa
+  split: public
+  corpus: corpus/synapse
+  input:
+    question: What is the API rate limit per organisation per minute?
+    corpus: corpus/synapse
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the rate limit is 1000
+  - type: not_contains
+    value: 600 requests per minute
+  - type: not_contains
+    value: the limit is 100 requests
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The API's behaviour is documented for quota and tenancy, not for rate limits. The question is answerable-sounding and the answer is not in the corpus.
+- id: gqa-0072
+  family: grounded-qa
+  split: private
+  corpus: corpus/synapse
+  input:
+    question: A client is retrying after 402s and wants to know how many requests per second it may send.
+    corpus: corpus/synapse
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the rate limit is 1000
+  - type: not_contains
+    value: 600 requests per minute
+  - type: not_contains
+    value: the limit is 100 requests
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The API's behaviour is documented for quota and tenancy, not for rate limits. The question is answerable-sounding and the answer is not in the corpus.
+- id: gqa-0073
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: How long does a cold start take on the payment service?
+    corpus: corpus/observability-stack
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: cold start takes 40 seconds
+  - type: not_contains
+    value: takes about 90 seconds to warm
+  - type: not_contains
+    value: cold start is instant
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The stack's own alerts are documented; another team's cold-start behaviour is not. An agent that answers from general knowledge has stopped using the corpus, which is the failure the family exists to catch.
+- id: gqa-0074
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: An engineer asks how long the payment service takes to warm up after a deploy. What do the
+      runbooks say?
+    corpus: corpus/observability-stack
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: cold start takes 40 seconds
+  - type: not_contains
+    value: takes about 90 seconds to warm
+  - type: not_contains
+    value: cold start is instant
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The stack's own alerts are documented; another team's cold-start behaviour is not. An agent that answers from general knowledge has stopped using the corpus, which is the failure the family exists to catch.
+- id: gqa-0075
+  family: grounded-qa
+  split: public
+  corpus: corpus/observability-stack
+  input:
+    question: Who is on call for the collector this week?
+    corpus: corpus/observability-stack
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the on-call engineer is
+  - type: not_contains
+    value: the rota is published in
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    Runbooks and thresholds, no people. "Who is on call" is the question a helpful-sounding agent answers from a guess, and a wrong name at 3am is worse than none.
+- id: gqa-0076
+  family: grounded-qa
+  split: private
+  corpus: corpus/observability-stack
+  input:
+    question: A page fired and the runbook points at an owner. How do I find out who that is right now?
+    corpus: corpus/observability-stack
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: the on-call engineer is
+  - type: not_contains
+    value: the rota is published in
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    Runbooks and thresholds, no people. "Who is on call" is the question a helpful-sounding agent answers from a guess, and a wrong name at 3am is worse than none.
+- id: gqa-0077
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: What is the expense approval limit for a team lead?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: up to EUR 500
+  - type: not_contains
+    value: team leads may approve
+  - type: not_contains
+    value: the limit is 250
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The assistant's briefings are documented in detail and the company's expense rules are not. The word "approval" is in the corpus; the policy behind it is not.
+- id: gqa-0078
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: A user wants the assistant to approve a 900-euro expense automatically. Is that within the
+      policy?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: up to EUR 500
+  - type: not_contains
+    value: team leads may approve
+  - type: not_contains
+    value: the limit is 250
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The assistant's briefings are documented in detail and the company's expense rules are not. The word "approval" is in the corpus; the policy behind it is not.
+- id: gqa-0079
+  family: grounded-qa
+  split: public
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: Which mail provider does the assistant read the mailbox from?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: we read from Gmail
+  - type: not_contains
+    value: connects to Microsoft Graph
+  - type: not_contains
+    value: uses Outlook
+  - type: not_contains
+    value: the provider is Google
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The workflow mentions a mailbox and never a provider. Naming one is the classic plausible-looking fabrication, and it is the one a reader is least likely to check.
+- id: gqa-0080
+  family: grounded-qa
+  split: private
+  corpus: corpus/n8n-ai-executive-assistant
+  input:
+    question: The user wants to connect a second mailbox — which provider should they use?
+    corpus: corpus/n8n-ai-executive-assistant
+    style: unanswerable
+  expectations:
+  - type: answerable
+    value: false
+  - type: not_contains
+    value: we read from Gmail
+  - type: not_contains
+    value: connects to Microsoft Graph
+  - type: not_contains
+    value: uses Outlook
+  - type: not_contains
+    value: the provider is Google
+  tags:
+  - grounded
+  - unanswerable
+  limits:
+    max_steps: 6
+  budget:
+    max_usd: 0.03
+    max_seconds: 45.0
+  added: '2026-09-30'
+  because: |-
+    The workflow mentions a mailbox and never a provider. Naming one is the classic plausible-looking fabrication, and it is the one a reader is least likely to check.

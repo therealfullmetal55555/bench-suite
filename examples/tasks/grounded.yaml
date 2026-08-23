@@ -1,0 +1,64 @@
+# Grounded questions, all answerable from examples/tasks/corpus/. Public split: the
+# tasks people develop against.
+tasks:
+  - id: gqa-0001
+    family: grounded-qa
+    split: public
+    corpus: corpus
+    input:
+      question: "Why did the v2 rollout stop refunding orders?"
+    expectations:
+      - type: contains
+        value: "permission"
+      - type: citations
+        must_cite: [corpus/incidents.md#2026-08-refunds-stopped]
+      - type: trajectory
+        required_tools: [search_docs]
+    because: |
+      The 2026-08 incident: the bot blamed the prompt when the cause was a permission
+      change, and answered confidently enough that nobody checked.
+
+  - id: gqa-0002
+    family: grounded-qa
+    split: public
+    corpus: corpus
+    input:
+      question: "How long do I have to ask for a refund?"
+    expectations:
+      - type: contains
+        value: "30 days"
+      - type: not_contains
+        value: "exception"
+    because: |
+      Support kept making exceptions outside the window, which is a policy answer the
+      bot has to give the same way every time.
+
+  - id: gqa-0003
+    family: grounded-qa
+    split: public
+    corpus: corpus
+    input:
+      question: "What is the capital of Peru?"
+    expectations:
+      - type: answerable
+        value: false
+      - type: contains
+        value: "does not cover"
+    because: |
+      The corpus has nothing to say, and an agent that invents an answer is worse than
+      one that says so. This is the task v2 fails.
+
+  - id: gqa-0004
+    family: grounded-qa
+    split: public
+    corpus: corpus
+    input:
+      question: "Why did order lookups time out in May?"
+    expectations:
+      - type: contains
+        value: "carrier"
+      - type: citations
+        must_cite: [corpus/incidents.md#2026-05-order-lookups-timed-out]
+    because: |
+      A latency incident whose cause was one API call per item — the answer names the
+      mechanism, not just the symptom.

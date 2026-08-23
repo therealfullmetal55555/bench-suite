@@ -1,0 +1,29 @@
+# Extraction: the one family where the answer is exactly checkable, so it is almost
+# judge-free by construction.
+tasks:
+  - id: ext-0001
+    family: structured-extraction
+    split: public
+    input:
+      document: |
+        Invoice 4471 from Northwind Tools, dated 2026-08-14.
+        Two items: 3 × brass hinge @ 12.50 and 1 × locking pin @ 40.00.
+        Total due 77.50 USD, payable within 14 days.
+      schema:
+        type: object
+        required: [invoice_id, vendor, total, currency]
+        properties:
+          invoice_id: {type: string}
+          vendor: {type: string}
+          total: {type: number}
+          currency: {type: string}
+    expectations:
+      - type: fields
+        values:
+          invoice_id: "4471"
+          vendor: "Northwind Tools"
+          total: 77.5
+          currency: "USD"
+    because: |
+      Invoice shapes are where extraction agents fail quietly: a total that is off by
+      the tax line still looks like a total.
