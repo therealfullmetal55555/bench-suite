@@ -1,0 +1,529 @@
+# The ground truth for the grounded-qa family, one entry per passage.
+#
+# Why this file exists rather than expectations typed into task YAML: a generator that
+# invents its own expected answer produces a task nobody can verify, and a hand-written
+# expectation drifts the moment somebody edits the document. Here the answer is anchored to
+# a passage, and `tests/test_generators.py` asserts that every `must_include` phrase really
+# appears in the passage it is attributed to. Editing a document without editing this file
+# is a test failure, not a task that silently scores everybody wrong.
+#
+# Each fact carries two questions: the public split asks the first, the private split asks
+# the second. Different wording, same passage — which is the honest shape of a held-back
+# split for a task whose corpus is published.
+
+facts:
+  - id: gq-refund-window
+    corpus: rag-support-bot
+    passage: faq.md#refund-window
+    tags: [refunds, policy]
+    because: |
+      The window is the thing customers argue about, and an agent that quotes the order
+      date instead of the delivery date is wrong by exactly the days a parcel spent in a
+      depot — which is when somebody asks.
+    public:
+      question: "How long does a customer have to ask for a refund after delivery?"
+      must_include: ["30 days"]
+      style: direct
+    private:
+      question: "A customer's parcel was delivered 20 days ago. They want their money back. Are they in time, and what are you quoting as the start of the clock?"
+      must_include: ["30 days", "delivered"]
+      style: scenario
+
+  - id: gq-damaged-window
+    corpus: rag-support-bot
+    passage: faq.md#damaged-orders
+    tags: [refunds, policy]
+    because: |
+      The one case where the window does not apply. An agent that applies it anyway tells a
+      customer their broken parcel is too old to matter, which is the answer that becomes a
+      screenshot.
+    public:
+      question: "Is a damaged order subject to the 30-day refund window?"
+      must_include: ["not bound by the refund window"]
+      style: direct
+    private:
+      question: "A parcel arrived smashed 40 days after delivery. The customer wants either a replacement or a refund — who decides which?"
+      must_include: ["replacement or a refund", "theirs"]
+      style: scenario
+
+  - id: gq-shipping-days
+    corpus: rag-support-bot
+    passage: faq.md#shipping-estimates
+    tags: [shipping, policy]
+    because: |
+      Business days, and not counting the day of the order. Every estimate that is wrong by
+      two days is a support ticket, and every ticket is a person explaining arithmetic.
+    public:
+      question: "An order placed on a Friday has a 3-day shipping estimate. When does it arrive?"
+      must_include: ["Wednesday", "business days"]
+      style: scenario
+    private:
+      question: "What do estimates count, and what does an agent quote to the customer?"
+      must_include: ["business days", "range"]
+      style: direct
+
+  - id: gq-order-changes
+    corpus: rag-support-bot
+    passage: faq.md#order-changes
+    tags: [orders, policy]
+    because: |
+      Editing an order that has already been picked sends a parcel to the old address and
+      leaves a ticket nobody can close. The cutoff is the whole answer.
+    public:
+      question: "Can a customer change the delivery address on an order?"
+      must_include: ["until it is picked"]
+      style: direct
+    private:
+      question: "The warehouse has already picked order 1077 and the customer wants a different address. What are the two options you can offer?"
+      must_include: ["cancel and re-order", "delivery date"]
+      style: scenario
+
+  - id: gq-escalation-rule
+    corpus: rag-support-bot
+    passage: faq.md#escalation
+    tags: [escalation, policy]
+    because: |
+      Escalation costs somebody else's time, and the rule that replaced "escalate when
+      unsure" exists because unsure turned into a day-and-a-half queue.
+    public:
+      question: "When should a support agent escalate to a human?"
+      must_include: ["asked twice", "business account"]
+      style: direct
+    private:
+      question: "A customer has contradicted the same refusal for the third time on a personal account. Escalate or keep answering?"
+      must_include: ["asked twice"]
+      style: scenario
+
+  - id: gq-august-cause
+    corpus: rag-support-bot
+    passage: incidents.md#2026-08-refunds-stopped
+    tags: [incidents, retrieval]
+    because: |
+      The August incident, and the wrong theory that cost two days: everything looked like a
+      prompt problem and it was a permission. This is the task the whole portfolio is built
+      from.
+    public:
+      question: "Why did the v2 support worker stop issuing refunds in August 2026?"
+      must_include: ["permission change"]
+      style: direct
+    private:
+      question: "Two days were spent tuning a prompt during the August refund outage. What was actually wrong, and what should the team have looked at instead?"
+      must_include: ["permission change", "billing:refund"]
+      style: scenario
+
+  - id: gq-august-dates
+    corpus: rag-support-bot
+    passage: incidents.md#2026-08-refunds-stopped
+    tags: [incidents, dates]
+    because: |
+      A cause question with a date in it, which is where an agent that half-remembers an
+      incident invents a day. The corpus has the day; the task asks for it.
+    public:
+      question: "On what date did the August refunds outage begin?"
+      must_include: ["12 August"]
+      style: direct
+    private:
+      question: "I'm writing the incident summary for the refunds outage. When did it start, and what did every refund call return once it had?"
+      must_include: ["12 August", "403"]
+      style: scenario
+
+  - id: gq-july-escalations
+    corpus: rag-support-bot
+    passage: incidents.md#2026-07-escalation-too-eagerly
+    tags: [incidents, escalation]
+    because: |
+      The fix for one incident became the next one. Worth a task because "escalate more" is
+      the answer an agent reaches for whenever it is unsure, and it has a price.
+    public:
+      question: "What happened to the human queue after the escalation rules were loosened in July 2026?"
+      must_include: ["tripled"]
+      style: direct
+    private:
+      question: "A team wants to fix slow replies by escalating more. What happened the last time that was tried?"
+      must_include: ["day and a half", "tripled"]
+      style: scenario
+
+  - id: gq-may-cause
+    corpus: rag-support-bot
+    passage: incidents.md#2026-05-order-lookups-timed-out
+    tags: [incidents, retrieval]
+    because: |
+      The May timeouts, where the obvious theory — traffic — is the one the write-up names
+      and rejects in the same sentence. An agent that answers "traffic" has pattern-matched.
+    public:
+      question: "Why did order lookups time out in May 2026?"
+      must_include: ["connection pool"]
+      style: direct
+    private:
+      question: "Somebody says the May lookup timeouts were caused by the traffic spike. Is that right, and what was the fix?"
+      must_include: ["pool", "forty"]
+      style: scenario
+
+  - id: gq-rls-forced
+    corpus: synapse
+    passage: tenancy.md#row-level-security
+    tags: [tenancy, security]
+    because: |
+      Enabled but not forced is the tenancy bug that survives a code review: the policies
+      are there, and the one connection that can read everything ignores them.
+    public:
+      question: "Why does every tenant table have row level security forced rather than just enabled?"
+      must_include: ["table owner", "policies"]
+      style: direct
+    private:
+      question: "A reviewer says the RLS policies are enough and the FORCE keyword is belt and braces. What is the specific hole they are missing?"
+      must_include: ["owner", "bypasses"]
+      style: scenario
+
+  - id: gq-tenant-setting
+    corpus: synapse
+    passage: tenancy.md#row-level-security
+    tags: [tenancy, security]
+    because: |
+      The setting has to be local to the transaction. On a pooled connection, a tenant id
+      that outlives its request is the next request reading somebody else's rows.
+    public:
+      question: "How is the current tenant set for a query, and why does it have to be that way on a pooled connection?"
+      must_include: ["SET LOCAL"]
+      style: direct
+    private:
+      question: "Why is the tenant set inside the transaction rather than once per connection?"
+      must_include: ["leak", "pooled"]
+      style: direct
+
+  - id: gq-404
+    corpus: synapse
+    passage: tenancy.md#missing-rows-are-404
+    tags: [tenancy, api]
+    because: |
+      The single answer for both "not yours" and "not there". A 403 is a fact about somebody
+      else's account, and enumeration turns it into a list.
+    public:
+      question: "What does the API return for an object that belongs to another tenant, and why not 403?"
+      must_include: ["404", "exists"]
+      style: direct
+    private:
+      question: "An attacker is walking object ids and comparing responses. Which status code would let them learn which ids are real?"
+      must_include: ["403"]
+      style: scenario
+
+  - id: gq-seats
+    corpus: synapse
+    passage: tenancy.md#seats-are-counted-never-stored
+    tags: [billing, tenancy]
+    because: |
+      A stored count and a counted count disagree eventually, and the one that is wrong is
+      the one that invoices. The task asks for the shape of the fix, not the SQL.
+    public:
+      question: "How many seats does an organisation have, and where does that number come from?"
+      must_include: ["query", "never cached"]
+      style: direct
+    private:
+      question: "Why is a seat count not a column on the organisation row?"
+      must_include: ["disagree", "bills"]
+      style: direct
+
+  - id: gq-invitations
+    corpus: synapse
+    passage: tenancy.md#invitations
+    tags: [tenancy, api]
+    because: |
+      Accepting twice is how a forwarded email adds a member nobody invited, and the
+      conditional update is the fix.
+    public:
+      question: "What happens if an invitation link is opened twice?"
+      must_include: ["accepted", "404"]
+      style: direct
+    private:
+      question: "An invitation was forwarded and the recipient's colleague opened it first. What stops the second acceptance from adding a member?"
+      must_include: ["conditional update"]
+      style: scenario
+
+  - id: gq-idempotency
+    corpus: synapse
+    passage: billing.md#idempotency
+    tags: [billing, retries]
+    because: |
+      Double charging is the one money bug nobody forgives, and the key that prevents it has
+      to survive the process that made it.
+    public:
+      question: "How does the billing path avoid charging a customer twice when a request is retried?"
+      must_include: ["idempotency key"]
+      style: direct
+    private:
+      question: "The first charge attempt timed out and the retry happened in a different process hours later. How does the second attempt avoid becoming a second charge?"
+      must_include: ["key", "original charge"]
+      style: scenario
+
+  - id: gq-metered
+    corpus: synapse
+    passage: billing.md#metered-usage
+    tags: [billing]
+    because: |
+      Deltas, not totals, and a reconciliation gate before the invoice. A dropped batch is
+      survivable; an invoice for a number nobody can reproduce is not.
+    public:
+      question: "How is metered usage reported, and what happens before an invoice is drafted?"
+      must_include: ["hourly", "reconcile"]
+      style: direct
+    private:
+      question: "The provider's usage count does not match ours for this period. What does the system do, and what is allowed to happen instead?"
+      must_include: ["blocks the invoice"]
+      style: scenario
+
+  - id: gq-over-quota
+    corpus: synapse
+    passage: billing.md#over-quota
+    tags: [billing, api]
+    because: |
+      Over-quota is a decision to keep the workspace readable, and the status code is how a
+      client learns it without guessing from a message.
+    public:
+      question: "What does the API do when an organisation is over its quota?"
+      must_include: ["402", "read-only"]
+      style: direct
+    private:
+      question: "A customer's card failed and they are over quota. Can they still read their data, and what tells their client that?"
+      must_include: ["readable", "402"]
+      style: scenario
+
+  - id: gq-dunning
+    corpus: synapse
+    passage: billing.md#dunning
+    tags: [billing]
+    because: |
+      The retry schedule and the trial length are two numbers a customer support agent gets
+      asked for, and recollecting either of them produces a promise nobody keeps.
+    public:
+      question: "On which days does a failed payment retry, and how long is the trial?"
+      must_include: ["day 1, 3, and 7", "14 days"]
+      style: direct
+    private:
+      question: "A customer signed up without a card and never opened the workspace. Are they charged on day 15?"
+      must_include: ["does not ask for one", "14 days"]
+      style: scenario
+
+  - id: gq-token-spike
+    corpus: observability-stack
+    passage: runbooks.md#token-cost-spike
+    tags: [observability, runbook]
+    because: |
+      A cost page whose obvious theory is traffic, and whose actual cause is a prompt change
+      that broke the cache. The panel that tells them apart is named in the document.
+    public:
+      question: "The token cost alert fired. What is the usual cause, and which panel tells you it is not traffic?"
+      must_include: ["cached-token ratio", "prompt"]
+      style: direct
+    private:
+      question: "Cost tripled but the token count did not move. What changed, and what should you check first?"
+      must_include: ["prompt", "cached"]
+      style: scenario
+
+  - id: gq-trace-loss
+    corpus: observability-stack
+    passage: runbooks.md#trace-loss
+    tags: [observability, runbook]
+    because: |
+      Spans accepted and not stored, with the queue as the cause. An engineer who raises the
+      backend quota has spent money on the wrong end of the pipe.
+    public:
+      question: "The trace loss alert fired: spans are accepted but not stored. What is the usual cause?"
+      must_include: ["queue"]
+      style: direct
+    private:
+      question: "Spans are disappearing between the collector and the backend. What is the first metric to look at, and what is not the fix?"
+      must_include: ["exporter_queue_size", "backend"]
+      style: scenario
+
+  - id: gq-backpressure
+    corpus: observability-stack
+    passage: runbooks.md#collector-backpressure
+    tags: [observability, runbook]
+    because: |
+      Retrying doubles the traffic that caused the refusal. The loop is the lesson, and the
+      two memory settings are the knob.
+    public:
+      question: "What happens when the collector's memory limiter refuses to allocate?"
+      must_include: ["stops accepting", "retrying"]
+      style: direct
+    private:
+      question: "Which two settings size the collector's memory limiter, and what should be done at the SDK before either is raised?"
+      must_include: ["limit_mib", "spike_limit_mib"]
+      style: scenario
+
+  - id: gq-noisy-alert
+    corpus: observability-stack
+    passage: runbooks.md#noisy-alert
+    tags: [observability, policy]
+    because: |
+      Deleting beats silencing, and the reason is stated in the document: a silenced alert
+      stops being read and becomes a rumour. This is a policy answer, not a metric one.
+    public:
+      question: "What happens to an alert that pages more than twice a week without a customer-visible symptom?"
+      must_include: ["deleted"]
+      style: direct
+    private:
+      question: "Why does the team delete a noisy alert instead of silencing it for a while?"
+      must_include: ["rumour"]
+      style: direct
+
+  - id: gq-latency-threshold
+    corpus: observability-stack
+    passage: alerts.md#latency
+    tags: [observability, alerts]
+    because: |
+      A threshold with the reason attached: ten minutes rather than one, because one minute
+      is a GC pause and paging on GC pauses burns out a rotation.
+    public:
+      question: "The latency alert pages when the p99 is above 2 seconds for how long, and why that long?"
+      must_include: ["ten minutes", "garbage collection"]
+      style: direct
+    private:
+      question: "Why is the latency alert not set to a single slow minute?"
+      must_include: ["garbage collection"]
+      style: direct
+
+  - id: gq-error-rate-both
+    corpus: observability-stack
+    passage: alerts.md#error-rate
+    tags: [observability, alerts]
+    because: |
+      Two conditions, and the second is the one people delete: a percentage over three
+      requests is a broken health check. Paging on it teaches people to ignore the pager.
+    public:
+      question: "What are the two conditions in the error rate alert, and why is the request rate one of them?"
+      must_include: ["2%", "1 per second"]
+      style: direct
+    private:
+      question: "A deploy has a broken health check so 100% of three requests fail. Does that page, and why not?"
+      must_include: ["request rate"]
+      style: scenario
+
+  - id: gq-absence
+    corpus: observability-stack
+    passage: alerts.md#absence
+    tags: [observability, alerts]
+    because: |
+      The alert everyone forgets: a target that stopped being scraped also stopped firing
+      everything else it owns, so a silent collector looks healthy from inside a dashboard.
+    public:
+      question: "Why does the stack alert on absent scrapes rather than only on bad values?"
+      must_include: ["stops firing"]
+      style: direct
+    private:
+      question: "A collector has been down for ten minutes. Which alerts does that hide, and which one catches it?"
+      must_include: ["ScrapeAbsence", "every other alert"]
+      style: scenario
+
+  - id: gq-saturation
+    corpus: observability-stack
+    passage: alerts.md#saturation
+    tags: [observability, alerts]
+    because: |
+      Warn at 80, page at 95, and the reason the warning exists at all: so the page is not
+      the first thing anyone hears about it.
+    public:
+      question: "At what levels does the saturation alert warn and page?"
+      must_include: ["80%", "95%"]
+      style: direct
+    private:
+      question: "Why is there a warning threshold at all if the page is the thing that matters?"
+      must_include: ["woken up"]
+      style: direct
+
+  - id: gq-briefing-empty
+    corpus: n8n-ai-executive-assistant
+    passage: workflows.md#the-morning-briefing
+    tags: [automation, policy]
+    because: |
+      An empty digest is the one that teaches a reader to stop opening them, so the right
+      behaviour on a quiet day is to send nothing at all. Agents asked to "always produce
+      output" get this backwards.
+    public:
+      question: "What does the assistant do on a morning with nothing to report?"
+      must_include: ["not sent at all"]
+      style: direct
+    private:
+      question: "Why is the briefing not sent on an empty day, and why is it one message rather than three?"
+      must_include: ["stop opening", "one message"]
+      style: direct
+
+  - id: gq-dedup
+    corpus: n8n-ai-executive-assistant
+    passage: workflows.md#deduplication
+    tags: [automation]
+    because: |
+      A stable id per item, and "changed" meaning the fields moved rather than the timestamp.
+      Without it the same unread invoice appears for eleven mornings and the workflow gets muted.
+    public:
+      question: "How does the briefing avoid repeating the same item two mornings in a row?"
+      must_include: ["stable id"]
+      style: direct
+    private:
+      question: "An unread invoice appeared in yesterday's briefing and appears again today. What decides whether it shows up a second time?"
+      must_include: ["fields differ"]
+      style: scenario
+
+  - id: gq-conflicts
+    corpus: n8n-ai-executive-assistant
+    passage: workflows.md#conflicts
+    tags: [automation, calendar]
+    because: |
+      The assistant names the conflict and the shorter event, and never proposes a slot: the
+      free/busy view has never known what a person intends.
+    public:
+      question: "How does the briefing report two overlapping meetings?"
+      must_include: ["shorter"]
+      style: direct
+    private:
+      question: "Why does the assistant not propose a new time for a double-booked meeting?"
+      must_include: ["free/busy", "intends"]
+      style: direct
+
+  - id: gq-approvals
+    corpus: n8n-ai-executive-assistant
+    passage: workflows.md#approvals
+    tags: [automation, safety]
+    because: |
+      Anything with a side effect is drafted and queued, and a draft expires in 24 hours so a
+      week-old reply is not sent by somebody catching up on their inbox.
+    public:
+      question: "What happens to an action that would send mail on the user's behalf?"
+      must_include: ["approval"]
+      style: direct
+    private:
+      question: "How long does a queued draft stay valid, and why is that number there?"
+      must_include: ["24 hours"]
+      style: direct
+
+  - id: gq-duplicate-briefings
+    corpus: n8n-ai-executive-assistant
+    passage: incidents.md#2026-06-duplicate-briefings
+    tags: [automation, incidents]
+    because: |
+      Clean-up instead of prevention is the failure being tested: deduplicating the items
+      hides the second copy, and a lock on the date is what stops it existing.
+    public:
+      question: "What caused the assistant to send two briefings ninety seconds apart in June 2026?"
+      must_include: ["trigger", "lock"]
+      style: direct
+    private:
+      question: "An overlapping trigger sent the briefing twice. What was the fix, and why was deduplicating the items not it?"
+      must_include: ["lock", "hidden"]
+      style: scenario
+
+  - id: gq-stale-cache
+    corpus: n8n-ai-executive-assistant
+    passage: incidents.md#2026-04-stale-cache
+    tags: [automation, incidents]
+    because: |
+      A cache keyed on the wrong thing: right account, changed filter, six days of wrong
+      briefings and no error. The fix is the key, not a shorter TTL.
+    public:
+      question: "Why did the April 2026 mailbox cache serve wrong data for six days?"
+      must_include: ["filter"]
+      style: direct
+    private:
+      question: "A cache key included the account id but not something else. What was missing, and what does the key contain now?"
+      must_include: ["hash of the filter set"]
+      style: scenario

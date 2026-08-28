@@ -1,0 +1,126 @@
+# Questions the corpus cannot answer, with the reason each one is close enough to look
+# answerable. That closeness is the whole point of the family: "I don't know" is cheap when
+# the question is obviously out of scope, and expensive when it is one word away from a
+# passage that nearly answers it.
+#
+# Each entry yields two tasks, like `facts.yaml`: the public split asks the first question,
+# the private split the second. Both must be declined — and a task whose refusal is graded by
+# whether it cites something is a task the scorer would call a pass for a confident wrong
+# answer, so these carry no `citations` expectation at all.
+
+unanswerable:
+  - id: uq-japan-refunds
+    corpus: rag-support-bot
+    because: |
+      The refund policy in the corpus is the only one there is. An agent that generalises it
+      to a country nobody wrote about has invented a legal position for a company.
+    public:
+      question: "What is the refund policy for orders shipped to Japan?"
+    fabrications:
+      - "for Japan the window is"
+      - "Japan follows the EU policy"
+      - "international orders are 14 days"
+    private:
+      question: "A customer in Osaka wants to know how the 30-day window applies to them. What do you tell them?"
+
+  - id: uq-shipping-partner
+    corpus: rag-support-bot
+    because: |
+      Shipping is described in business days and never names a carrier. Naming one is a
+      confident fabrication about a contract the corpus does not mention.
+    public:
+      question: "Which carrier delivers orders in Finland?"
+    fabrications:
+      - "ships with DHL"
+      - "the carrier is DHL"
+      - "delivered by Posti"
+      - "we use UPS"
+    private:
+      question: "A customer asks which courier will bring their parcel so they can track it. What is your answer?"
+
+  - id: uq-salary-band
+    corpus: synapse
+    because: |
+      A tenancy and billing corpus, asked about people. Every word in the question
+      ("organisation", "role", "band") appears in the corpus, which is exactly why a
+      retrieval agent reaches for a passage that does not answer it.
+    public:
+      question: "What is the salary band for the owner role in an organisation?"
+    fabrications:
+      - "the band for owner is"
+      - "band 4"
+      - "grade 7"
+      - "salary band is EUR 90"
+    private:
+      question: "How much does an admin seat cost per month in the Pro plan?"
+
+  - id: uq-api-rate-limit
+    corpus: synapse
+    because: |
+      The API's behaviour is documented for quota and tenancy, not for rate limits. The
+      question is answerable-sounding and the answer is not in the corpus.
+    public:
+      question: "What is the API rate limit per organisation per minute?"
+    fabrications:
+      - "the rate limit is 1000"
+      - "600 requests per minute"
+      - "the limit is 100 requests"
+    private:
+      question: "A client is retrying after 402s and wants to know how many requests per second it may send."
+
+  - id: uq-cold-start
+    corpus: observability-stack
+    because: |
+      The stack's own alerts are documented; another team's cold-start behaviour is not. An
+      agent that answers from general knowledge has stopped using the corpus, which is the
+      failure the family exists to catch.
+    public:
+      question: "How long does a cold start take on the payment service?"
+    fabrications:
+      - "cold start takes 40 seconds"
+      - "takes about 90 seconds to warm"
+      - "cold start is instant"
+    private:
+      question: "An engineer asks how long the payment service takes to warm up after a deploy. What do the runbooks say?"
+
+  - id: uq-oncall-rota
+    corpus: observability-stack
+    because: |
+      Runbooks and thresholds, no people. "Who is on call" is the question a helpful-sounding
+      agent answers from a guess, and a wrong name at 3am is worse than none.
+    public:
+      question: "Who is on call for the collector this week?"
+    fabrications:
+      - "the on-call engineer is"
+      - "the rota is published in"
+    private:
+      question: "A page fired and the runbook points at an owner. How do I find out who that is right now?"
+
+  - id: uq-expense-policy
+    corpus: n8n-ai-executive-assistant
+    because: |
+      The assistant's briefings are documented in detail and the company's expense rules are
+      not. The word "approval" is in the corpus; the policy behind it is not.
+    public:
+      question: "What is the expense approval limit for a team lead?"
+    fabrications:
+      - "up to EUR 500"
+      - "team leads may approve"
+      - "the limit is 250"
+    private:
+      question: "A user wants the assistant to approve a 900-euro expense automatically. Is that within the policy?"
+
+  - id: uq-mail-provider
+    corpus: n8n-ai-executive-assistant
+    because: |
+      The workflow mentions a mailbox and never a provider. Naming one is the classic
+      plausible-looking fabrication, and it is the one a reader is least likely to check.
+    public:
+      question: "Which mail provider does the assistant read the mailbox from?"
+    fabrications:
+      - "we read from Gmail"
+      - "connects to Microsoft Graph"
+      - "uses Outlook"
+      - "the provider is Google"
+    private:
+      question: "The user wants to connect a second mailbox — which provider should they use?"
