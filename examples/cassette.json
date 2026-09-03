@@ -1,0 +1,226 @@
+{
+  "entries": {
+    "ext-0001/0": {
+      "cost_usd": "0.000036",
+      "error": null,
+      "latency_ms": 12,
+      "messages": [],
+      "output": "The documentation does not cover that.",
+      "raw": {},
+      "retrieved": [],
+      "steps": null,
+      "tokens": {
+        "cached": 150,
+        "completion": 3,
+        "prompt": 225
+      },
+      "tool_calls": []
+    },
+    "gqa-0001/0": {
+      "cost_usd": "0.000059",
+      "error": null,
+      "latency_ms": 25,
+      "messages": [],
+      "output": "The v2 rollout stopped refunding orders after a permission change removed the billing\nscope from the worker's role. (source: incidents.md#2026-08-refunds-stopped)",
+      "raw": {
+        "agent_version": "v1"
+      },
+      "retrieved": [
+        {
+          "id": "incidents.md#2026-08-refunds-stopped",
+          "score": 5.643337,
+          "text": "## 2026-08 refunds stopped\n\nThe v2 rollout stopped refunding orders after a permission change removed the billing\nscope from the worker's role. The prompt was not involved, and rolling the permission\nback fixed it within the hour."
+        }
+      ],
+      "steps": 1,
+      "tokens": {
+        "cached": 150,
+        "completion": 40,
+        "prompt": 236
+      },
+      "tool_calls": [
+        {
+          "arguments": {
+            "query": "Why did the v2 rollout stop refunding orders?"
+          },
+          "error": null,
+          "latency_ms": null,
+          "name": "search_docs",
+          "result": "incidents.md#2026-08-refunds-stopped"
+        }
+      ]
+    },
+    "gqa-0002/0": {
+      "cost_usd": "0.000046",
+      "error": null,
+      "latency_ms": 25,
+      "messages": [],
+      "output": "Refunds are accepted within 30 days of delivery. (source: faq.md#refund-window)",
+      "raw": {
+        "agent_version": "v1"
+      },
+      "retrieved": [
+        {
+          "id": "faq.md#refund-window",
+          "score": 1.824602,
+          "text": "## Refund window\n\nRefunds are accepted within 30 days of delivery. Outside that window the order is not\neligible, and support cannot make an exception."
+        }
+      ],
+      "steps": 1,
+      "tokens": {
+        "cached": 150,
+        "completion": 19,
+        "prompt": 234
+      },
+      "tool_calls": [
+        {
+          "arguments": {
+            "query": "How long do I have to ask for a refund?"
+          },
+          "error": null,
+          "latency_ms": null,
+          "name": "search_docs",
+          "result": "faq.md#refund-window"
+        }
+      ]
+    },
+    "gqa-0003/0": {
+      "cost_usd": "0.000037",
+      "error": null,
+      "latency_ms": 12,
+      "messages": [],
+      "output": "The documentation does not cover that.",
+      "raw": {},
+      "retrieved": [],
+      "steps": null,
+      "tokens": {
+        "cached": 150,
+        "completion": 3,
+        "prompt": 232
+      },
+      "tool_calls": []
+    },
+    "gqa-0004/0": {
+      "cost_usd": "0.000063",
+      "error": null,
+      "latency_ms": 25,
+      "messages": [],
+      "output": "The order lookup tool called the carrier API once per item, which for a ten-item order\ntook eleven seconds and hit the client's timeout. (source: incidents.md#2026-05-order-lookups-timed-out)",
+      "raw": {
+        "agent_version": "v1"
+      },
+      "retrieved": [
+        {
+          "id": "incidents.md#2026-05-order-lookups-timed-out",
+          "score": 2.326988,
+          "text": "## 2026-05 order lookups timed out\n\nThe order lookup tool called the carrier API once per item, which for a ten-item order\ntook eleven seconds and hit the client's timeout. Batched, and the p95 fell to 900ms."
+        },
+        {
+          "id": "faq.md#order-changes",
+          "score": 1.234676,
+          "text": "## Order changes\n\nAn order can be changed until it is picked. After that it can only be returned."
+        }
+      ],
+      "steps": 1,
+      "tokens": {
+        "cached": 150,
+        "completion": 47,
+        "prompt": 234
+      },
+      "tool_calls": [
+        {
+          "arguments": {
+            "query": "Why did order lookups time out in May?"
+          },
+          "error": null,
+          "latency_ms": null,
+          "name": "search_docs",
+          "result": "incidents.md#2026-05-order-lookups-timed-out"
+        }
+      ]
+    },
+    "traj-0001/0": {
+      "cost_usd": "0.000046",
+      "error": null,
+      "latency_ms": 25,
+      "messages": [],
+      "output": "An order can be changed until it is picked. (source: faq.md#order-changes)",
+      "raw": {
+        "agent_version": "v1"
+      },
+      "retrieved": [
+        {
+          "id": "faq.md#order-changes",
+          "score": 1.234676,
+          "text": "## Order changes\n\nAn order can be changed until it is picked. After that it can only be returned."
+        },
+        {
+          "id": "incidents.md#2026-05-order-lookups-timed-out",
+          "score": 0.977365,
+          "text": "## 2026-05 order lookups timed out\n\nThe order lookup tool called the carrier API once per item, which for a ten-item order\ntook eleven seconds and hit the client's timeout. Batched, and the p95 fell to 900ms."
+        }
+      ],
+      "steps": 1,
+      "tokens": {
+        "cached": 150,
+        "completion": 18,
+        "prompt": 236
+      },
+      "tool_calls": [
+        {
+          "arguments": {
+            "query": "My order arrived damaged, what are my options?"
+          },
+          "error": null,
+          "latency_ms": null,
+          "name": "search_docs",
+          "result": "faq.md#order-changes"
+        }
+      ]
+    },
+    "traj-0002/0": {
+      "cost_usd": "0.000047",
+      "error": null,
+      "latency_ms": 25,
+      "messages": [],
+      "output": "Refunds are accepted within 30 days of delivery. (source: faq.md#refund-window)",
+      "raw": {
+        "agent_version": "v1"
+      },
+      "retrieved": [
+        {
+          "id": "faq.md#refund-window",
+          "score": 3.129016,
+          "text": "## Refund window\n\nRefunds are accepted within 30 days of delivery. Outside that window the order is not\neligible, and support cannot make an exception."
+        },
+        {
+          "id": "faq.md#shipping-estimates",
+          "score": 1.267248,
+          "text": "## Shipping estimates\n\nStandard shipping is 3\u20135 working days; express is next working day if the order was\nplaced before 14:00."
+        }
+      ],
+      "steps": 1,
+      "tokens": {
+        "cached": 150,
+        "completion": 19,
+        "prompt": 236
+      },
+      "tool_calls": [
+        {
+          "arguments": {
+            "query": "It has been 45 days, can I still get a refund?"
+          },
+          "error": null,
+          "latency_ms": null,
+          "name": "search_docs",
+          "result": "faq.md#refund-window"
+        }
+      ]
+    }
+  },
+  "meta": {
+    "entries": 7,
+    "label": "support-bot"
+  },
+  "version": 1
+}

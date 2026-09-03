@@ -1,0 +1,28 @@
+# The judge, as a file. Nothing in this repository has run it against a live model yet —
+# the tests stub the transport and the calibration runs on canned verdicts — so treat these
+# rates as the shape of the thing rather than as a quotation.
+
+model: gpt-4.1-mini
+base_url: https://api.openai.com/v1
+api_key_env: BENCH_JUDGE_KEY
+
+# Zero, and recorded in the calibration: a judge at temperature 1 turns the board's own
+# noise into a result. κ is measured at the setting the board uses, and the setting is here.
+temperature: 0.0
+timeout_s: 60
+
+# The verdict cache. Keyed by what was asked — rubric, question, answer, model, temperature
+# — never by a task id, so a re-scored submission costs nothing and editing a task cannot
+# serve a stale verdict.
+cache_dir: judge-cache
+
+# Below this, judged expectations are reported and excluded from the aggregate rather than
+# scored. 0.70 is "substantial agreement" on the usual reading, and it is deliberately
+# strict: a judge that agrees with a person 60% of the time is worse than no judge, because
+# it launders a coin flip into a number.
+kappa_floor: 0.70
+
+# Per-million-token rates, so the judge's own cost lands in the cost column. Priced the same
+# way a target is; the same two numbers are `prompt_per_mtok` in a target file.
+price_prompt_per_mtok: 0.40
+price_completion_per_mtok: 1.60
