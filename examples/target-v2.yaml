@@ -1,0 +1,13 @@
+# The same entrant, one build later. Only `AGENT_VERSION` differs, which is the point:
+# two builds of one agent, compared, is what this harness is for.
+name: example-support-bot
+version: v2
+target:
+  kind: scripted
+  callable: agent:answer
+  label: support-bot
+  import_paths: ["."]
+  env:
+    AGENT_VERSION: v2
+  price_prompt_per_mtok: 0.15
+  price_completion_per_mtok: 0.60

@@ -1,0 +1,15 @@
+# The example entrant. `import_paths: ["."]` is where `agent.py` is importable from,
+# relative to this file — not relative to wherever you happen to be standing.
+name: example-support-bot
+version: v1
+target:
+  kind: scripted
+  callable: agent:answer
+  label: support-bot
+  import_paths: ["."]
+  env:
+    AGENT_VERSION: v1
+  price_prompt_per_mtok: 0.15
+  price_completion_per_mtok: 0.60
+notes: |
+  The fixture from examples/agent.py. Copy the shape, not the agent.
